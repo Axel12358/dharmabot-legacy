@@ -28,7 +28,7 @@ from core.deduplicador import Deduplicador
 from core.task_queue import TaskQueue
 
 from scrapers import (
-    scrape_goabase, scrape_songkick, scrape_ra,
+    scrape_goabase, scrape_ra,
     scrape_facebook_events,
     scrape_reddit_psy, scrape_psytrance_pl, scrape_isratrance,
     scrape_ektoplazm, scrape_meetup_psy
@@ -83,12 +83,20 @@ def _leer_csv(filename: str) -> List[Dict]:
 
 
 def _escribir_csv(filename: str, eventos: List[Dict]) -> None:
+    keys = ["nombre", "fecha", "lugar", "pais", "continente", "subcontinente",
+            "fuente", "organizador", "email", "link", "subgenero", "tipo_lugar"]
+    # El header real del CSV es autoridad (13 col: preserva 'contactos' etc.)
+    if Path(filename).exists():
+        try:
+            with open(filename, "r", encoding="utf-8") as _fh:
+                _hdr = csv.DictReader(_fh).fieldnames
+            if _hdr:
+                keys = list(_hdr)
+        except (IOError, csv.Error):
+            pass
     tmp = filename + ".tmp"
     with open(tmp, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=[
-            "nombre", "fecha", "lugar", "pais", "continente", "subcontinente",
-            "fuente", "organizador", "email", "link", "subgenero", "tipo_lugar"
-        ], extrasaction="ignore")
+        writer = csv.DictWriter(f, fieldnames=keys, extrasaction="ignore")
         writer.writeheader()
         for ev in eventos:
             out = dict(ev)

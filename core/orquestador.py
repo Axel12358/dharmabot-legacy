@@ -197,6 +197,15 @@ def _leer_csv(filename: str) -> List[Dict]:
 def _escribir_csv(filename: str, eventos: List[Dict]) -> None:
     keys = ["nombre", "fecha", "lugar", "pais", "continente", "subcontinente",
             "fuente", "organizador", "email", "link", "subgenero", "tipo_lugar"]
+    # El header real del CSV es autoridad (13 col: preserva 'contactos' etc.)
+    if Path(filename).exists():
+        try:
+            with open(filename, "r", encoding="utf-8") as _fh:
+                _hdr = csv.DictReader(_fh).fieldnames
+            if _hdr:
+                keys = list(_hdr)
+        except (IOError, csv.Error):
+            pass
     tmp = filename + ".tmp"
     with open(tmp, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=keys, extrasaction="ignore")
