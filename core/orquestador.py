@@ -73,6 +73,9 @@ def _construir_SCRAPERS() -> Dict[str, Dict[str, Any]]:
                 resultado[nombre] = {
                     "funcion": cfg["funcion"],
                     "timeout": cfg.get("timeout", TIMEOUT_DEFECTO),
+                    # 'tipo' debe sobrevivir: los 'enriquecer' no son fuentes
+                    # de eventos y se saltan al montar futuros.
+                    "tipo": cfg.get("tipo", "eventos"),
                 }
             print(f"🔌 Plugin loader: {len(resultado)} scrapers activos "
                   f"(de {len(todos)} totales)")
@@ -269,6 +272,12 @@ def orquestar_scrapers(activos: Optional[List[str]] = None,
     with ThreadPoolExecutor(max_workers=len(scraper_dict) or 1) as pool:
         futuros = {}
         for nombre, cfg in scraper_dict.items():
+            if cfg.get("tipo") == "enriquecer":
+                # No es fuente de eventos: su firma exige la lista de eventos
+                # como argumento (la ejecuta main.py vía core.enriquecer_fb_og).
+                # Lanzarlo aquí daría TypeError garantizado.
+                print(f"  ⏭️ {nombre}: tipo 'enriquecer' — se ejecuta aparte, no como fuente")
+                continue
             timeout = cfg.get("timeout", TIMEOUT_DEFECTO) or TIMEOUT_DEFECTO
             futuros[nombre] = (pool.submit(_ejecutar_scraper, cfg), timeout)
 
