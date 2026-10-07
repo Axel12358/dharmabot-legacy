@@ -20,7 +20,6 @@ import csv
 import fcntl
 import time
 from contextlib import contextmanager
-from pathlib import Path
 
 
 @contextmanager
@@ -46,10 +45,13 @@ def csv_locked_rows(csv_path, timeout=180, encoding="utf-8", extrasaction="ignor
                 fieldnames = reader.fieldnames
                 rows = list(reader)
             yield rows, fieldnames
-            with open(csv_path, "w", encoding=encoding, newline="") as f:
+            tmp_path = csv_path + ".tmp"
+            with open(tmp_path, "w", encoding=encoding, newline="") as f:
                 w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction=extrasaction)
                 w.writeheader()
                 w.writerows(rows)
+            import os
+            os.replace(tmp_path, csv_path)
         finally:
             try:
                 fcntl.flock(lockfh.fileno(), fcntl.LOCK_UN)
