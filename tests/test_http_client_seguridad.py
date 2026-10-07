@@ -4,9 +4,7 @@ Verifica que get_active_proxies() jamás devuelva un proxy vacío o "directo",
 y que siempre sea socks5h (DNS dentro del túnel). Si está configurado un
 proxy residencial de terceros, también debe terminar en socks5h.
 """
-import json
 import sys
-import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
