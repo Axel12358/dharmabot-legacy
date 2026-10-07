@@ -15,18 +15,21 @@ from __future__ import annotations
 import base64
 import random
 import re
-import time
-from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import quote_plus, unquote
+from typing import Dict, List, Optional
+from urllib.parse import unquote
 
 import requests
+
+try:
+    from core.serp_cache import cache_get, cache_set
+    _HAY_CACHE = True
+except Exception:
+    _HAY_CACHE = False
 
 # --- Tor pool ---
 try:
     from core.tor_pool import (
-        IDENTIDADES_TOR,
         obtener_sesion_tor as _pool_sesion,
-        verificar_tor as _pool_verificar,
         rotar_tor as _pool_rotar,
         obtener_siguiente_identidad as _pool_siguiente,
     )
@@ -315,38 +318,42 @@ def _buscar_bing_directo_pag(query: str, sesion=None,
 
 def _buscar_searxng_local(query: str, sesion=None,
                           timeout: int = _TIMEOUT_DEFAULT) -> List[Dict]:
-    """SearxNG local (self-hosted Docker :8888) — multi-motor, sin Tor.
+    """SearxNG local (self-hosted Docker :8888) — rotación de engines, sin Tor.
 
-    Devuelve resultados reales de google/bing/brave/ddg (28+ por query) y
-    respeta site:facebook.com/events. Es LA vía rápida para dorks.
+    Prueba google → mojeek → bing → brave → ddg y devuelve el primero que
+    dé resultados. Así, cuando Google suspende la IP, seguimos sacando
+    resultados (mojeek/bing no se suspenden con la misma facilidad) en
+    lugar de esperar el `docker restart` del watchdog.
     """
+    motores = ("google", "startpage", "mojeek", "bing", "brave", "ddg")
     for base in ("http://localhost:8888", "http://127.0.0.1:8888"):
-        try:
-            r = requests.get(
-                base + "/search",
-                params={"q": query, "format": "json", "engines": "google"},
-                timeout=timeout,
-            )
-            if r.status_code != 200:
-                continue
-            data = r.json()
-            resultados = []
-            vistos = set()
-            for item in data.get("results", []):
-                url = item.get("url", "")
-                if not url or url in vistos:
+        for eng in motores:
+            try:
+                r = requests.get(
+                    base + "/search",
+                    params={"q": query, "format": "json", "engines": eng},
+                    timeout=timeout,
+                )
+                if r.status_code != 200:
                     continue
-                vistos.add(url)
-                resultados.append({
-                    "url": url,
-                    "titulo": item.get("title", ""),
-                    "snippet": item.get("content", "")[:300],
-                    "motor": "searxng_local",
-                })
-            if resultados:
-                return resultados[:_MAX_RESULTADOS]
-        except Exception:
-            continue
+                data = r.json()
+                resultados = []
+                vistos = set()
+                for item in data.get("results", []):
+                    url = item.get("url", "")
+                    if not url or url in vistos:
+                        continue
+                    vistos.add(url)
+                    resultados.append({
+                        "url": url,
+                        "titulo": item.get("title", ""),
+                        "snippet": item.get("content", "")[:300],
+                        "motor": "searxng_{}".format(eng),
+                    })
+                if resultados:
+                    return resultados[:_MAX_RESULTADOS]
+            except Exception:
+                continue
     return []
 
 
@@ -487,10 +494,17 @@ def buscar_serp(
         if fn is None:
             continue
 
-        try:
-            resultados = fn(query, sesion, timeout)
-        except Exception:
-            resultados = []
+        resultados = cache_get(motor, query) if _HAY_CACHE else None
+        if resultados is None:
+            try:
+                resultados = fn(query, sesion, timeout)
+            except Exception:
+                resultados = []
+            if _HAY_CACHE:
+                try:
+                    cache_set(motor, query, resultados)
+                except Exception:
+                    pass
 
         for r in resultados:
             url = r.get("url", "")

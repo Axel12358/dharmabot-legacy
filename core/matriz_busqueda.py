@@ -23,10 +23,8 @@ Uso:
 """
 import argparse
 import csv
-import itertools
 import json
 import random
-import re
 import sys
 import time
 from pathlib import Path
@@ -78,7 +76,6 @@ def generar_combinaciones(presupuesto: int = 200, semilla: int = 42, evitar_vist
         return []
 
     # Pesos de ciudades (normalizado)
-    total_peso = sum(c.get("peso", 20) for c in ciudades)
     # Sinónimos con peso: los top 5 (psytrance, progressive, goa, darkpsy, forest) 60% del presupuesto
     top_sinonimos = ["psytrance", "psy trance", "goa", "goa trance", "progressive", "prog", "darkpsy", "dark psy", "forest", "forest psy"]
     raros = [s for s in SINONIMOS_LIST if s not in top_sinonimos]
@@ -208,6 +205,19 @@ def ejecutar_combinaciones(combinaciones: List[Dict], dry_run: bool = False) -> 
         else:
             print(f"— 0 nuevos ({len(eventos)} hallazgos)")
 
+        # Checkpoint incremental: consolidar de a CHECKPOINT_CADA dorks para
+        # que el lote acumulado nunca quede huerfano en RAM.
+        if i % CHECKPOINT_CADA == 0 and nuevos_total:
+            try:
+                _agregados = _consolidar_lote(nuevos_total)
+                nuevos_total = []
+                print(f"   💾 checkpoint: {_agregados} añadidos al CSV ({i}/{len(combinaciones)})")
+            except Exception as e:
+                # Si el lock del CSV agota el timeout (otro proceso lo tiene),
+                # no morir: se reintenta en el próximo checkpoint.
+                print(f"   ⚠️ checkpoint falló ({type(e).__name__}: {e}); reintento en {CHECKPOINT_CADA} dorks")
+                time.sleep(5)
+
         time.sleep(1.2)
         if i % 10 == 0:
             try:
@@ -218,24 +228,39 @@ def ejecutar_combinaciones(combinaciones: List[Dict], dry_run: bool = False) -> 
 
     if nuevos_total:
         # Consolidar aditivo al CSV bajo lock (no pisar escritores concurrentes)
-        try:
-            from core.csv_lock import csv_locked_rows
-        except Exception:
-            from csv_lock import csv_locked_rows
-        with csv_locked_rows(CSV_FILE, timeout=180) as (rows, _fn):
-            cols = list(rows[0].keys()) if rows else list(nuevos_total[0].keys())
-            seen = {r.get("link") for r in rows if r.get("link")}
-            agregados = 0
-            for ev in nuevos_total:
-                if ev.get("link") and ev["link"] in seen:
-                    continue
-                rows.append(ev)
-                seen.add(ev.get("link"))
-                agregados += 1
+        _agregados = _consolidar_lote(nuevos_total)
         dedup.guardar()
-        print(f"\n💾 {agregados} nuevos añadidos → CSV total {len(rows)}")
+        print(f"\n💾 {_agregados} nuevos añadidos → CSV (total {len(nuevos_total)})")
 
     return len(nuevos_total)
+
+
+# Cada cuántos dorks se consolida de forma incremental (checkpoint). Si un
+# proceso muere a mitad de round se pierden a lo sumo CHECKPOINT_CADA dorks,
+# no todo el lote que quedaba en RAM.
+CHECKPOINT_CADA = 500
+
+
+def _consolidar_lote(nuevos_total: list) -> int:
+    """Escribe el lote acumulado al CSV bajo lock. Devuelve cuántos se agregaron.
+
+    Merge por `link` contra el archivo (aditivo, nunca pisa filas ajenas).
+    """
+    global CSV_FILE
+    try:
+        from core.csv_lock import csv_locked_rows
+    except Exception:
+        from csv_lock import csv_locked_rows
+    with csv_locked_rows(CSV_FILE, timeout=180) as (rows, _fn):
+        seen = {r.get("link") for r in rows if r.get("link")}
+        agregados = 0
+        for ev in nuevos_total:
+            if ev.get("link") and ev["link"] in seen:
+                continue
+            rows.append(ev)
+            seen.add(ev.get("link"))
+            agregados += 1
+    return agregados
 
 
 if __name__ == "__main__":
@@ -252,4 +277,4 @@ if __name__ == "__main__":
     elif args.dry_run:
         ejecutar_combinaciones(combos, dry_run=True)
     else:
-        print(f"Tip: añade --ejecutar para lanzar SERP o --dry-run para solo ver")
+        print("Tip: añade --ejecutar para lanzar SERP o --dry-run para solo ver")

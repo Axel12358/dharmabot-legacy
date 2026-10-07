@@ -11,13 +11,12 @@ Procesa eventos sin email / sin organizador:
 """
 import csv
 import json
-import os
 import re
 import sys
 import time
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 _PROJECT_ROOT = str(Path(__file__).resolve().parent)
@@ -30,7 +29,6 @@ def fetch_hard(url, timeout=12):
     """Fetch con timeout HARD via subprocess + SIGKILL (curl_cffi+Tor)."""
     try:
         import subprocess
-        import os
         code = (
             f"import sys; sys.path.insert(0,{_PROJECT_ROOT!r}); "
             "from core.http_client import get_html; "
@@ -382,7 +380,6 @@ def minar_organizadores_telegram(ciudades, max_por_ciclo=1):
 
 def _aplicar_mapa_org(mapa, solo_vacios=True):
     """Aplica {link_normalizado: org} al CSV bajo lock. Devuelve ganado."""
-    import html as _html
     if not mapa:
         return 0
     from core.csv_lock import csv_locked_rows
@@ -493,6 +490,33 @@ def es_org_slugderivado(org):
     return True
 
 
+def _serp_eventos(motor, dork, timeout=22):
+    """Consulta el motor indicado y devuelve dict {results:[{url,titulo,snippet}]}.
+    - 'ddg': proceso hijo serp_worker (DuckDuckGo html).
+    - 'startpage': searxng local (docker) con engine startpage — indexa FB
+      que DDG no toca (URLs events/<slug>/<subslug> e IDs numéricos).
+    """
+    if motor == 'ddg':
+        return ddg_search(dork, timeout=timeout)
+    try:
+        import urllib.request as _ur
+        q = urllib.parse.quote(dork)
+        u = (f'http://localhost:8888/search?q={q}&format=json'
+             f'&engines=startpage')
+        req = _ur.Request(u, headers={'User-Agent': 'Mozilla/5.0'})
+        d = json.loads(_ur.urlopen(req, timeout=timeout).read())
+        out = []
+        for x in d.get('results', []):
+            out.append({
+                'url': x.get('url', '') or '',
+                'titulo': x.get('title', '') or '',
+                'snippet': x.get('content', '') or '',
+            })
+        return {'status': 1, 'results': out}
+    except Exception:
+        return {'status': 0, 'results': []}
+
+
 def minar_organizadores_fb_serp(ciudades, anios=None, subgeneros=None, max_por_ciclo=2):
     """Barrido SERP por ciudad: dork 'site:facebook.com/events <ciudad> <subg> <año>'
     y extrae organizador del snippet 'Event in X by ORGANIZER on <día>'.
@@ -517,27 +541,40 @@ def minar_organizadores_fb_serp(ciudades, anios=None, subgeneros=None, max_por_c
         dorks.append(f'site:facebook.com/events {ciudad} psy trance')
         dorks.append(f'site:facebook.com/events {ciudad} trance')
         for dork in list(dict.fromkeys(dorks)):
-            try:
-                res = ddg_search(dork, timeout=22)
-            except Exception:
-                continue
-            for r in res.get('results', []):
-                url = _normalizar_link_fb(r.get('url', '') or '')
-                if '/events' not in url:
+            consultas = [('ddg', dork)]
+            if not (dork.endswith(' psy trance') or dork.endswith(' trance')):
+                consultas.append(('startpage', dork))
+            for _motor, _d in consultas:
+                try:
+                    res = _serp_eventos(_motor, _d, timeout=22)
+                except Exception:
                     continue
-                sn = _html.unescape(r.get('snippet', '') or '')
-                org = ''
-                m = _FB_SNIPPET_PAT.search(sn) or _FB_SNIPPET_PAT2.search(sn)
-                if m:
-                    org = _limpiar_org_fb(m.group('org'))
-                if not org:
-                    # fallback: título 'X - La Casa de' con '- Facebook' fuera
-                    tit = _html.unescape(r.get('titulo', '') or '')
-                    tit = re.sub(r'\s*-\s*Facebook\s*$', '', tit, flags=re.I).strip()
-                    org = _limpiar_org_fb(tit)
-                if org:
-                    resultados[url] = org
-            time.sleep(0.8)
+                for r in res.get('results', []):
+                    url = _normalizar_link_fb(r.get('url', '') or '')
+                    if '/events' not in url:
+                        continue
+                    sn = _html.unescape(r.get('snippet', '') or '')
+                    org = ''
+                    m = _FB_SNIPPET_PAT.search(sn) or _FB_SNIPPET_PAT2.search(sn)
+                    if m:
+                        org = _limpiar_org_fb(m.group('org'))
+                    if not org:
+                        # fallback: título 'X - La Casa de' con '- Facebook' fuera
+                        tit = _html.unescape(r.get('titulo', '') or '')
+                        tit = re.sub(r'\s*-\s*Facebook\s*$', '', tit, flags=re.I).strip()
+                        org = _limpiar_org_fb(tit)
+                        if not org or org.lower() in ('facebook',):
+                            # startpage indexa events/<org_slug>/<subslug>: el primer
+                            # segmento es la página del organizador (p.ej. void-berlin).
+                            _pm = re.match(r'facebook\.com/events/([^/?#]{3,})/', url.lower())
+                            if _pm and not _pm.group(1).split('-')[-1].isdigit():
+                                _slug_org_name = _pm.group(1).replace('-', ' ').strip()
+                                org = _limpiar_org_fb(_slug_org_name.title())
+                        if org:
+                            resultados[url] = org
+                time.sleep(0.6)
+                if len(resultados) >= 40:
+                    break
             if len(resultados) >= 40:
                 break
     return resultados
@@ -602,7 +639,6 @@ def buscar_org_para_evento(evento):
     """Busca organizador para un evento via DDG."""
     nombre = evento.get('nombre', '')
     lugar = evento.get('lugar', '')
-    link = evento.get('link', '')
 
     queries = [
         f'"{nombre}" organizer OR promoter OR "presented by"',
@@ -696,7 +732,7 @@ def procesar_batch(eventos, tipo, max_procesar=5, offset=0):
     off = offset % n
     ventana = (eventos[off:] + eventos[:off])[:max_procesar]
     
-    with ThreadPoolExecutor(max_workers=3) as pool:
+    with ThreadPoolExecutor(max_workers=12) as pool:
         futuros = {
             pool.submit(_procesar_un_evento, ev, tipo): ev
             for ev in ventana
@@ -738,7 +774,7 @@ def main():
             pass
     
     iteration = checkpoint.get('iteration', 0)
-    BATCH = checkpoint.get('batch', 40)
+    BATCH = checkpoint.get('batch', 150)
     PAUSA = checkpoint.get('pausa', 5)
     
     while True:
@@ -846,7 +882,7 @@ def main():
                     y = (r.get('fecha', '') or '')[:4]
                     if y.isdigit() and y >= '2024':
                         _years.setdefault(c, _C()).update([y])
-            ciudades_ahora = [pend.pop() for _ in range(min(2, len(pend)))]
+            ciudades_ahora = [pend.pop() for _ in range(min(8, len(pend)))]
             pend[:0] = ciudades_ahora                              # rotar al frente
             log(f"  🌆 Barrido SERP por ciudad: {ciudades_ahora}")
             try:
@@ -868,6 +904,14 @@ def main():
             ganado = 0
             mejorado = 0
             if mapa:
+                # Índice por slug del primer segmento de events/<slug> para
+                # propagar el organizador a TODAS las filas FB con esa página
+                # host, aunque la URL completa del SERP no matchee textualmente.
+                _slug_org = {}
+                for _u, _o in mapa.items():
+                    _sm = re.search(r'facebook\.com/events/([^/?#]+)', _u.lower())
+                    if _sm:
+                        _slug_org.setdefault(_sm.group(1), _o)
                 from core.csv_lock import csv_locked_rows
                 with csv_locked_rows(CSV_FILE) as (todas, fieldnames):
                     for r in todas:
@@ -876,7 +920,12 @@ def main():
                         org_act = (r.get('organizador', '') or '').strip()
                         if org_act and org_act.lower() != 'n/a' and not es_org_slugderivado(org_act):
                             continue
-                        org = mapa.get(_normalizar_link_fb(r.get('link', '') or ''))
+                        rl = _normalizar_link_fb(r.get('link', '') or '')
+                        org = mapa.get(rl)
+                        if not org:
+                            _sm2 = re.search(r'facebook\.com/events/([^/?#]+)', rl.lower())
+                            if _sm2:
+                                org = _slug_org.get(_sm2.group(1))
                         if org and org.lower() != org_act.lower():
                             if org_act and org_act.lower() != 'n/a':
                                 mejorado += 1
@@ -884,7 +933,7 @@ def main():
                                 ganado += 1
                             r['organizador'] = org
                             r['tipo_organizador'] = tipo_organizador(org)
-                log(f"  🌆 Barrido SERP: {ganado} nuevos + {mejorado} mejorados (de {len(mapa)} soles)")
+                log(f"  🌆 Barrido SERP: {ganado} nuevos + {mejorado} mejorados (de {len(mapa)} soles, {len(_slug_org)} slugs)")
 
         # 2c. Telegram: canales públicos por ciudad (vector del asesor). Un canal
         #     activo cubre docenas de eventos del mismo organizador; los mensajes
@@ -899,6 +948,17 @@ def main():
             except Exception as e:
                 log(f"  ⚠️ Telegram error: {str(e)[:80]}")
 
+        # 2d. Re-propagación periódica del caché limpio (cada 5 ciclos):
+        #     reusa emails ya existentes en fuentes fiables para organizadores
+        #     resueltos por el propio loop (no busca nuevos, solo propaga).
+        if iteration % 2 == 0:
+            try:
+                from propagacion_caché_limpio import repropagar_cache
+                _gan = repropagar_cache()
+                log(f"  ♻️ Re-propagación caché: {_gan} emails aplicados")
+            except Exception as e:
+                log(f"  ⚠️ Re-propagación caché error: {str(e)[:80]}")
+
         # 3. Rama A (asesor): email por organizador → DDG → web → email.
         #    Un promoter cubre muchos eventos: se busca UNA vez y se aplica a
         #    todos sus eventos sin email. Cola rotativa persistente (3/iteración,
@@ -909,6 +969,8 @@ def main():
             for r in sin_org + cargar_eventos_sin_email():
                 org = (r.get('organizador', '') or '').strip()
                 if not org or org.lower() == 'n/a':
+                    continue
+                if _es_org_placeholder(org):
                     continue
                 if (r.get('email', '') or '').strip():
                     continue
@@ -921,25 +983,79 @@ def main():
             pend_em = dict(sorted(pend_em.items(), key=lambda kv: -kv[1]['n']))
             checkpoint['org_email_pendientes'] = pend_em
         try:
-            hoy = datetime.now(timezone.utc).toordinal()
-            candidatos = [v for v in pend_em.values() if v['ult'] < hoy and v['intentos'] < 3]
+            from concurrent.futures import ThreadPoolExecutor as _Th
+            now_ts = time.time()
+            candidatos = [v for v in pend_em.values()
+                          if (v['ult'] if isinstance(v.get('ult'), (int, float)) else 0) < now_ts - 4*3600
+                          and v['intentos'] < 3]
             candidatos.sort(key=lambda v: v['n'], reverse=True)
-            for obj in candidatos[:2]:
+
+            def _rama_a(obj):
                 obj['intentos'] += 1
-                obj['ult'] = hoy
+                obj['ult'] = now_ts
                 try:
                     email = minar_email_organizador(obj['key'], obj.get('lugar', ''))
                 except Exception:
                     email = ''
                 if not email:
-                    log(f"  ⚠️ Rama A sin email: {obj['key']} (intento {obj['intentos']}/3)")
-                    continue
+                    return obj, 0, ''
                 g = _aplicar_email_organizador(obj['key'], email)
-                log(f"  ✉️ Rama A: {g} eventos de '{obj['key']}' ← {email}")
-                if g > 0:
-                    del pend_em[obj['key'].lower()]
+                return obj, g, email
+
+            with _Th(max_workers=8) as pool:
+                futuros = [pool.submit(_rama_a, o) for o in candidatos[:40]]
+                for f in futuros:
+                    try:
+                        obj, g, email = f.result(timeout=300)
+                    except Exception as exc:
+                        log(f"  ⚠️ Rama A thread error: {str(exc)[:60]}")
+                        continue
+                    if not email:
+                        log(f"  ⚠️ Rama A sin email: {obj['key']} (intento {obj['intentos']}/3)")
+                        continue
+                    log(f"  ✉️ Rama A: {g} eventos de '{obj['key']}' ← {email}")
+                    if g > 0:
+                        del pend_em[obj['key'].lower()]
         except Exception as e:
             log(f"  ⚠️ Rama A error: {str(e)[:80]}")
+
+        # Detector de meseta (criterio de 'tope real').
+        # Meseta: <0.3 puntos de ganancia acumulada en ORG y EMAIL en 30
+        # iteraciones (DOS rotaciones completas del pool de ciudades:
+        # 118 ciudades / 8 por ciclo ≈ 15 iter por rotación). Así el barrido
+        # SERP ya barrió cada ciudad 2 veces y confirmamos que no queda nada.
+        try:
+            with csv_locked_rows(CSV_FILE) as (todas, _):
+                n = max(1, len(todas))
+                pct_org = sum(1 for r in todas if (r.get('organizador', '') or '').strip() not in ('', 'N/A')) / n
+                pct_email = sum(1 for r in todas if (r.get('email', '') or '').strip() not in ('', 'N/A')) / n
+            hist = checkpoint.setdefault('meseta_historial', [])
+            hist.append({'it': iteration, 'org': pct_org, 'email': pct_email})
+            hist[:] = hist[-30:]
+            meta_org = checkpoint.get('meta_org', 0.95)
+            meta_email = checkpoint.get('meta_email', 0.95)
+            llegado = pct_org >= meta_org and pct_email >= meta_email
+            meseta = len(hist) == 30 and (
+                hist[-1]['org'] - hist[0]['org'] < 0.003 and
+                hist[-1]['email'] - hist[0]['email'] < 0.003
+            )
+            log(f"  📊 Org {pct_org*100:.1f}% | Email {pct_email*100:.1f}% | "
+                f"meta {meta_org*100:.0f}/{meta_email*100:.0f} | llego={llegado} meseta={meseta}")
+            if llegado or meseta:
+                parar = checkpoint.get('parar_al_llegar', False)
+                if parar:
+                    estado = "por umbral" if llegado else "por meseta"
+                    log(f"  🏁 COMPLETADO ({estado}) — deteniendo loop en iteración {iteration}")
+                    checkpoint['iteration'] = iteration
+                    checkpoint['batch'] = BATCH
+                    checkpoint['pausa'] = PAUSA
+                    checkpoint['estado'] = f'completado:{estado}'
+                    with open(CHECKPOINT_FILE, 'w') as f:
+                        json.dump(checkpoint, f, indent=2)
+                    return
+                log("  ℹ️ Meta/meseta alcanzada pero parar_al_llegar=False — continúo completando")
+        except Exception as e:
+            log(f"  ⚠️ Meseta check error: {str(e)[:80]}")
 
         # Checkpoint
         checkpoint['iteration'] = iteration
