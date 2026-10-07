@@ -36,10 +36,9 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 
 import requests
-from bs4 import BeautifulSoup
 
 _PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
 if _PROJECT_ROOT not in sys.path:
@@ -531,7 +530,7 @@ def _dedup_semantic(eventos: List[Dict]) -> List[Dict]:
 # Orquestador
 # --------------------------------------------------------------------------
 
-def scrape_instagram_events(config: Optional[dict] = None) -> List[Dict]:
+def _scrape_instagram_events_metodos_abc(config: Optional[dict] = None) -> List[Dict]:
     """
     Extrae eventos musicales de Instagram (psYTrance).
 

@@ -23,7 +23,7 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 _PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
 if _PROJECT_ROOT not in sys.path:
@@ -272,7 +272,6 @@ def _estrategia_serp_fallback(hashtag: str, max_results: int = 10) -> List[Dict]
     if not get_anti_block:
         return []
 
-    ab = get_anti_block()
     queries = [
         f'site:instagram.com "#{hashtag}" psytrance party',
         f'site:instagram.com "#{hashtag}" festival',

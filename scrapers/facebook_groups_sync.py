@@ -252,7 +252,7 @@ def scrape_group_publications(page, group_url, query):
                     "enlace": post_link,
                     "fuente": f"Facebook (grupo: {query})"
                 })
-            except Exception as e:
+            except Exception:
                 continue
     
     except Exception as e:
