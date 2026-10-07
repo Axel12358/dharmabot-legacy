@@ -17,9 +17,7 @@ Cómo añadir un nuevo scraper:
 
 import importlib
 import json
-import os
 import re
-import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -78,6 +76,12 @@ MODULOS_ESPECIALES = {
         "modulo": "scrapers.resident_advisor",
         "atributo": "scrape_ra",
         "timeout": 300,
+        "tipo": "eventos",
+    },
+    "partyflock": {
+        "modulo": "scrapers.partyflock",
+        "atributo": "scrape_partyflock",
+        "timeout": 180,
         "tipo": "eventos",
     },
     "instagram_scraper": {

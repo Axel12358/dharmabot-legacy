@@ -98,6 +98,10 @@ def _construir_SCRAPERS_HARDCODED() -> Dict[str, Dict[str, Any]]:
             "funcion": lambda: _importar("scrapers.resident_advisor", "scrape_ra")(),
             "timeout": 300,
         },
+        "partyflock": {
+            "funcion": lambda: _importar("scrapers.partyflock", "scrape_partyflock")(),
+            "timeout": 180,
+        },
         "facebook": {
             "funcion": lambda: _importar("scrapers.facebook_mcp", "scrape_facebook_events")(
                 max_keywords=12, max_visitas=20
