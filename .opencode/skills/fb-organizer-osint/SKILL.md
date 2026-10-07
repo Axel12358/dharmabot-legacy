@@ -24,6 +24,9 @@ tipo_lugar).
    recargar con `launchctl kickstart -k gui/$(id -u)/com.dharma.loop`.
 4. Los MCP de clasificador usan merge bajo lock:
    `core/mcp_clasificar.py` → `_guardar_merge_subgenero`.
+5. **Ortógrafo impecable** en todo `.md` y skill: tildes correctas y palabras con
+   erre doble sin z (*valiosa*, *información*, *clasificación* — nunca "valioza").
+   Corregir cualquier typo en la misma edición del archivo.
 
 ## Flujo de enriquecimiento (cascada)
 

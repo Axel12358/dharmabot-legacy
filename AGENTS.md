@@ -8,15 +8,29 @@
 
 - **Siempre sumar, nunca restar** (aditivo, no destructivo).
 - **Todo local, gratuito, sin login** (nada de APIs de pago, nada de credenciales).
+- **Los prompts que pida el usuario SIEMPRE se entregan en un block de código**
+  (fence ```) para copiar y pegar directo — NUNCA como archivo `.txt` ni en
+  respuesta suelta. Formato: block completo con todo el prompt dentro.
 - **Cualquier escritura al CSV `eventos_encontrados.csv` DEBE ir bajo
   `core/csv_lock.csv_locked_rows(path)`** (fcntl cooperativo). Cualquier `open("w")`
   directo rompe el dedup concurrente y trunca el CSV. No usar escritores directos.
 - Los JSON de estado runtime (root) y `config/` están en `.gitignore` (no públicos).
-- Commitear/pushear solo con control explícito de qué se staggea: des-stagear siempr
+- Commitear/pushear solo con control explícito de qué se staggea: des-stagear siempre
   los `*.json` de estado runtime antes de `git commit`. Los `*.md` en raíz se fuerzan
   con `git add -f` si es necesario.
 - Solo commitear cuando el usuario lo pida / confirme el flujo (workflow activo).
 - Al terminar cada tarea: `python3 -m py_compile <archivos>` para verificar sintaxis.
+
+## ORTOGRAFÍA (obligatoria en todos los `.md` y skills)
+
+- **Toda la ortografía debe ser impecable** en cualquier documento que se escriba
+  o edite: `AGENTS.md`, `README.md`, skills (`.opencode/skills/*/SKILL.md`),
+  reportes y prompts.
+- Palabras con erre doble **sin** z: *valiosa*, *información*, *clasificación*,
+  *común*, *después*, *básicamente*. Ejemplo corregido: ~~valioza~~ → **valiosa**.
+- Revisar tilde y mayúsculas antes de guardar (Rae: mayúsculas solo con nombre
+  propio; siglas en versalitas).
+- Si aparece un typo en un `.md` existente, corregirlo en la misma edición.
 
 ## OBJETIVO GENERAL
 

@@ -8,6 +8,8 @@ eventos_encontrados_*DEDUP*.csv
 # JSON state/cache (runtime, not code)
 *.json
 !config_modulos.json
+estado_runtime/
+core/cache_serp.sqlite3*
 
 # Logs
 *.log

@@ -151,3 +151,19 @@ Tests directos con Tor SOCKS5:
 - `core/serp_tor.py`: Interfaz centralizada para SERP. Usa DDG+SearxNG vía Tor. `buscar_serp(query)` y `buscar_serp_fb(subgenero, localidad)`.
 - `core/plugin_loader.py`: Auto-descubre scrapers en `scrapers/*.py`. Sin tocar `orquestador.py` para añadir nuevos.
 - `scrapers/fb_playwright_tor.py`: Playwright+Tor para páginas FB. Registrar pero desactivado (login wall).
+---
+
+## Auditoría Oct 2026 — REAFIRMADO (reglas de oro de identidad)
+
+**Confirmado y verificado en código (06 Oct 2026):**
+
+1. **NUNCA se usa la IP real del usuario.** `core/http_client.get_active_proxies()`:
+   - Si hay proxy residencial de terceros configurado → lo usa (nunca el del usuario), forzado a `socks5h://` (DNS dentro del túnel → no filtra IP).
+   - Si no → SIEMPRE `TOR_PROXIES` (`socks5h://127.0.0.1:9050`). **No existe ruta directa o fallback a IP real**: si Tor falla, `get_html` devuelve `None` (no "se va en directo").
+   - `activar_tor_en_requests()` monkeypatchea `requests.get/post` para que NINGÚN scraper que use `requests` exponga la IP del usuario.
+2. **NUNCA se usa login de Facebook ni perfiles personales.** Se trabaja solo con scraping público vía Tor. Cualquier código que pida sesión/cookies debe estar DESACTIVADO o con guard que exige `fb_state.json`.
+3. **Brazo eliminado (Oct 2026): `scrapers/facebook_groups_sync.py`.**
+   - Motivo: usaba Playwright con **IP real** contra `facebook.com/search/groups` — endpoint que exige login siempre → muro garantizado + honeypot anti-bot.
+   - Arreglo doble: metadata `scrapers/facebook_groups_sync.json` con `"activo": false` (lo respeta `core/plugin_loader.py`) + guard en código (si no existe `fb_state.json` → skip inmediato).
+4. **SERPs vía Tor funcionales (Oct 2026):** searxng **reparado** tras el rename de carpeta: el bind-mount del contenedor apuntaba a `dharmadhatu_agent_qwen/searxng_settings.yml` (ya no existe) → `Exit 127`. Recreado con `-v /Users/angelgarcia/dharmabot/searxng_settings.yml:/etc/searxng/settings.yml`. Ahora responde (los engines internos pueden caer por rate-limit: google/brave/DDG, se rota).
+5. **Operación**: `run_bot.sh` ahora usa `python -u` (sin buffering) — el log refleja el progreso en vivo (antes, stdout a archivo hacía buffering de bloque de 8KB y parecía congelado).
