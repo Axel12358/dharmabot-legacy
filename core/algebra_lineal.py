@@ -28,6 +28,7 @@ umbral de confianza; nunca sobrescribe datos existentes válidos salvo para
 completar "N/A".
 """
 
+from collections import Counter
 from datetime import date, datetime
 import json
 import os
@@ -425,6 +426,23 @@ def _predecir(texto_evento: str, modelo: Dict) -> Tuple[str, float]:
         return "N/A", 0.0
 
 
+def _predecir_con(vec: Optional[VectorizadorTFIDF],
+                  clf: Optional["ClasificadorSoftmax"],
+                  texto_evento: str) -> Tuple[str, float]:
+    """Igual que _predecir pero con vectorizador/clasificador ya cargados."""
+    if vec is None or clf is None:
+        return "N/A", 0.0
+    try:
+        X = vec.transform([texto_evento])
+        clases, prob = clf.predict_proba(X)
+        if not clases or prob.shape[1] == 0:
+            return "N/A", 0.0
+        i = int(np.argmax(prob[0]))
+        return clases[i], float(prob[0, i])
+    except Exception:
+        return "N/A", 0.0
+
+
 # ---------------------------------------------------------------------------
 # 4) Tipo de lugar (indoor/outdoor)
 # ---------------------------------------------------------------------------
@@ -529,6 +547,18 @@ def supervisar_y_mejorar(csv_path: str = "eventos_encontrados.csv",
         pass
 
     # --- Rellenar subgénero N/A y tipo_lugar ---
+    # Modelos cargados UNA sola vez: antes cada fila releía el pickle
+    # (predecir_* reconstruía vectorizador + clasificador por llamada).
+    modelo_sub = _cargar_modelo(SUBGENERO_PATH)
+    modelo_tipo = _cargar_modelo(TIPO_LUGAR_PATH)
+    vec_sub = clf_sub = vec_tipo = clf_tipo = None
+    if modelo_sub and modelo_sub.get("vectorizador"):
+        vec_sub = _cargar_vectorizador(modelo_sub["vectorizador"])
+        clf_sub = ClasificadorSoftmax.desde_estado(modelo_sub["clasificador"])
+    if modelo_tipo and modelo_tipo.get("vectorizador"):
+        vec_tipo = _cargar_vectorizador(modelo_tipo["vectorizador"])
+        clf_tipo = ClasificadorSoftmax.desde_estado(modelo_tipo["clasificador"])
+
     tiene_tipo = "tipo_lugar" in (eventos[0].keys())
     if not tiene_tipo:
         for ev in eventos:
@@ -538,7 +568,7 @@ def supervisar_y_mejorar(csv_path: str = "eventos_encontrados.csv",
         # subgénero
         cur = _limpiar(ev.get("subgenero", ""))
         if cur in ("n/a", "na", ""):
-            pred, conf = predecir_subgenero(texto)
+            pred, conf = _predecir_con(vec_sub, clf_sub, texto)
             if pred != "N/A" and conf >= UMBRAL_CONFIANZA:
                 ev["subgenero"] = pred
                 resultado["subgeneros_rellenados"].append({
@@ -549,7 +579,10 @@ def supervisar_y_mejorar(csv_path: str = "eventos_encontrados.csv",
         # tipo de lugar
         curt = _limpiar(ev.get("tipo_lugar", ""))
         if curt not in ("indoor", "outdoor"):
-            pred_t, conf_t = predecir_tipo_lugar(texto)
+            pred_t = _regla_tipo_lugar(texto)
+            conf_t = 1.0 if pred_t else 0.0
+            if not pred_t:
+                pred_t, conf_t = _predecir_con(vec_tipo, clf_tipo, texto)
             if pred_t != "N/A" and conf_t >= UMBRAL_CONFIANZA:
                 ev["tipo_lugar"] = pred_t
                 resultado["tipos_lugar_rellenados"].append({
@@ -588,24 +621,51 @@ def supervisar_y_mejorar(csv_path: str = "eventos_encontrados.csv",
 
 
 def _dedup_semantico_interno(eventos: List[Dict], resultado: Dict[str, Any],
-                             umbral: float = UMBRAL_NOMBRE) -> None:
+                             umbral: float = UMBRAL_NOMBRE,
+                             presupuesto_s: float = 600.0) -> None:
     """Elimina duplicados internos (nombre casi idéntico + fechas iguales/±1).
 
     Usa SOLO el nombre del evento y un umbral alto (0.92) para no fusionar
     eventos distintos del mismo recinto (p. ej. "Housy at Noxe" vs "HOPE at
     Noxe"). Nunca toca eventos con fecha no definida.
+
+    Eficiencia: las fechas se parsean UNA vez y los índices se agrupan por
+    día (solo se comparan pares del mismo día o día adyacente en vez de los
+    n·(n-1)/2 pares globales), y la similitud coseno TF-IDF se calcula sobre
+    contadores de tokens precomputados con idéntico resultado a
+    _similitud_dos, sin construir un vectorizador por par. Si excede
+    `presupuesto_s` se corta y se anota en el reporte.
     """
+    from collections import Counter, defaultdict
+    from datetime import timedelta
+    import time
+
+    fechas = [_fecha_evento(ev.get("fecha")) for ev in eventos]
+    contadores = [Counter(_tokenizar(_limpiar(ev.get("nombre", ""))))
+                  for ev in eventos]
+    por_dia: Dict[Any, List[int]] = defaultdict(list)
+    for i, f in enumerate(fechas):
+        if f is not None:
+            por_dia[f].append(i)
+
+    # idf de un token presente en 1 de 2 documentos: log((2+1)/(1+1)) + 1.
+    idf_unico = float(np.log(1.5)) + 1.0
     marcar = set()
-    for i in range(len(eventos)):
-        if i in marcar:
+    t_limite = time.monotonic() + presupuesto_s
+    for i, f in enumerate(fechas):
+        if i in marcar or f is None:
             continue
-        for j in range(i + 1, len(eventos)):
+        # Pares exactamente equivalentes a j > i con |f_i - f_j| <= 1 día.
+        candidatos = [j for j in por_dia[f] if j > i]
+        candidatos += [j for j in por_dia[f - timedelta(days=1)] if j > i]
+        candidatos += [j for j in por_dia[f + timedelta(days=1)] if j > i]
+        for j in candidatos:
             if j in marcar:
                 continue
-            if not _mismas_fechas(eventos[i].get("fecha"), eventos[j].get("fecha")):
+            ci, cj = contadores[i], contadores[j]
+            if not ci or not cj:
                 continue
-            sim = _similitud_dos(_limpiar(eventos[i].get("nombre", "")),
-                                 _limpiar(eventos[j].get("nombre", "")))
+            sim = _similitud_contadores(ci, cj, idf_unico)
             if sim >= umbral:
                 marcar.add(j)
                 resultado["duplicados_semanticos"].append({
@@ -614,12 +674,40 @@ def _dedup_semantico_interno(eventos: List[Dict], resultado: Dict[str, Any],
                     "similitud": round(sim, 3),
                     "fecha": eventos[j].get("fecha"),
                 })
+        if time.monotonic() > t_limite:
+            resultado["presupuesto_dedup_excedido_s"] = presupuesto_s
+            break
     # NOTA: no se eliminan filas del CSV. Regla innegociable del proyecto:
     # "sumar nunca restar" — la supervisión solo RELLENA campos N/A, no borra
     # eventos (ni siquiera duplicados semánticos, para no perder cobertura de
     # fuentes). Se registran en el reporte pero NO se quitan del listado.
     # if marcar:
     #     eventos[:] = [ev for idx, ev in enumerate(eventos) if idx not in marcar]
+
+
+def _similitud_contadores(ci: "Counter", cj: "Counter",
+                          idf_unico: float) -> float:
+    """Coseno TF-IDF exacto entre dos documentos ya tokenizados.
+
+    Equivalente a _similitud_dos(a, b) con ci = Counter(_tokenizar(a)):
+    con exactamente 2 documentos, idf = 1.0 si el token está en ambos y
+    `idf_unico` (= log(1.5)+1) si está solo en uno.
+    """
+    compartidos = ci.keys() & cj.keys()
+    if not compartidos:
+        return 0.0
+    dot = float(sum(ci[t] * cj[t] for t in compartidos))
+    na2 = 0.0
+    for t, v in ci.items():
+        w = v * (1.0 if t in cj else idf_unico)
+        na2 += w * w
+    nb2 = 0.0
+    for t, v in cj.items():
+        w = v * (1.0 if t in ci else idf_unico)
+        nb2 += w * w
+    if na2 <= 0.0 or nb2 <= 0.0:
+        return 0.0
+    return dot / ((na2 * nb2) ** 0.5)
 
 
 def _similitud_dos(a: str, b: str) -> float:
