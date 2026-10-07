@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import os
 import random
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -80,6 +81,33 @@ def get_active_proxies() -> dict:
 # Si fb lo rechaza, se puede cambiar a "safari15_3" o "safari16_0".
 IMPERSONATE_DEFAULT = "chrome110"
 
+# Cache en memoria de páginas ya descargadas (TTL 30 min, máx 500 entradas).
+# Solo cachea éxitos: un None (fallo) nunca se cachea, así el retry sigue vivo.
+_HTTP_CACHE_TTL = 1800
+_HTTP_CACHE_MAX = 500
+_HTTP_CACHE: dict = {}
+
+
+def _http_cache_key(url: str, impersonate: Optional[str]) -> tuple:
+    return (url, impersonate or IMPERSONATE_DEFAULT)
+
+
+def _http_cache_get(key: tuple) -> Optional[str]:
+    hit = _HTTP_CACHE.get(key)
+    if not hit:
+        return None
+    html, ts = hit
+    if time.time() - ts > _HTTP_CACHE_TTL:
+        _HTTP_CACHE.pop(key, None)
+        return None
+    return html
+
+
+def _http_cache_set(key: tuple, html: str) -> None:
+    if len(_HTTP_CACHE) >= _HTTP_CACHE_MAX:
+        _HTTP_CACHE.clear()
+    _HTTP_CACHE[key] = (html, time.time())
+
 _POOL_USERAGENTS = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 "
     "(KHTML, like Gecko) Version/15.3 Safari/605.1.15",
@@ -137,10 +165,15 @@ def get_html(url: str, timeout: int = 15, impersonate: Optional[str] = None) -> 
 
     - TLS de navegador + proxy (nunca IP del usuario).
     - Rota el User-Agent en cada llamada.
+    - Cachea éxitos 30 min (los fallos no se cachean).
     - Devuelve el HTML (str) o None si falla.
 
     El llamador debe tratar None como "omitir estrategia".
     """
+    ck = _http_cache_key(url, impersonate)
+    cached = _http_cache_get(ck)
+    if cached is not None:
+        return cached
     session = crear_sesion_tor(impersonate=impersonate)
     if session is None:
         return None
@@ -162,6 +195,7 @@ def get_html(url: str, timeout: int = 15, impersonate: Optional[str] = None) -> 
         text = getattr(resp, "text", None)
         if not text:
             return None
+        _http_cache_set(ck, text)
         return text
     except Exception:
         return None
