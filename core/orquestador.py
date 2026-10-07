@@ -314,85 +314,11 @@ def orquestar_scrapers(activos: Optional[List[str]] = None,
 
     print(f"\n📊 Total bruto recolectado: {len(todos_nuevos)} eventos")
 
-    # ---- Telegram (canales públicos, sin API) — opcional y aditiva ----
-    # Si scrapers/telegram existe, descubre canales via DuckDuckGo + t.me/s/,
-    # scrapea mensajes y extrae eventos. Nunca rompe el flujo: ante cualquier
-    # problema simplemente no añade nada.
-    try:
-        from scrapers.telegram import scrape_telegram_events
-        eventos_telegram = scrape_telegram_events()
-        if eventos_telegram:
-            eventos_telegram = [
-                _normalizar_evento(e) for e in eventos_telegram
-            ]
-            todos_nuevos.extend(eventos_telegram)
-            print(f"  ✅ Telegram: {len(eventos_telegram)} eventos añadidos")
-        else:
-            print("  ⚠️ Telegram: 0 eventos")
-    except ImportError:
-        pass  # Módulo no instalado, se sigue sin él
-    except Exception as e:
-        print(f"  ❌ Telegram: {type(e).__name__}: {e}")
-
-    # ---- Facebook Dorks (Groups/Pages/Emails) — opcional y aditiva ----
-    # NO devuelve eventos; guarda grupos/páginas/correos en JSON files
-    try:
-        from scrapers.facebook_dorks import scrape_facebook_dorks
-        fb_result = scrape_facebook_dorks()
-        total_hallazgos = fb_result.get("total_hallazgos", 0)
-        print(f"  ✅ Facebook Dorks: {total_hallazgos} hallazgos "
-              f"({fb_result.get('grupos', 0)} grupos, "
-              f"{fb_result.get('paginas', 0)} páginas, "
-              f"{fb_result.get('correos', 0)} correos)")
-    except ImportError:
-        pass
-    except Exception as e:
-        print(f"  ❌ Facebook Dorks: {type(e).__name__}: {e}")
-
-    # ---- Instagram Dorks (Posts + Profiles) — opcional y aditiva ----
-    try:
-        from scrapers.instagram_dorks import scrape_instagram_dorks
-        eventos_ig_dorks = scrape_instagram_dorks(limite=30)
-        if eventos_ig_dorks:
-            eventos_ig_dorks = [_normalizar_evento(e) for e in eventos_ig_dorks]
-            todos_nuevos.extend(eventos_ig_dorks)
-            print(f"  ✅ Instagram Dorks: {len(eventos_ig_dorks)} eventos añadidos")
-        else:
-            print("  ⚠️ Instagram Dorks: 0 eventos")
-    except ImportError:
-        pass
-    except Exception as e:
-        print(f"  ❌ Instagram Dorks: {type(e).__name__}: {e}")
-
-    # ---- MCP Organizador / Dorks Unificado (motor central) — opcional y aditiva ----
-    try:
-        from core.mcp_organizador import ejecutar_mcp_dorks
-        eventos_mcp = ejecutar_mcp_dorks(limite=50)
-        if eventos_mcp:
-            eventos_mcp = [_normalizar_evento(e) for e in eventos_mcp]
-            todos_nuevos.extend(eventos_mcp)
-            print(f"  ✅ MCP Organizador: {len(eventos_mcp)} eventos añadidos")
-        else:
-            print("  ⚠️ MCP Organizador: 0 eventos")
-    except ImportError:
-        pass
-    except Exception as e:
-        print(f"  ❌ MCP Organizador: {type(e).__name__}: {e}")
-
-    # ---- Agente Coordinador (Sistema Multiagente Ligero) — opcional y aditiva ----
-    # Si core/agente_coordinador.py existe, ejecuta los subagentes en paralelo
-    # (máx 3 simultáneos, semáforo Tor máx 2) y suma eventos nuevos al CSV.
-    # Nunca rompe el flujo: si no está disponible, se sigue igual que antes.
-    try:
-        from pathlib import Path as _P
-        if _P(__file__).resolve().parent.joinpath("agente_coordinador.py").exists():
-            from core.agente_coordinador import ejecutar_agentes
-            _nuevos_coord = ejecutar_agentes(dry_run=dry_run)
-            print(f"  ✅ Agente Coordinador: {_nuevos_coord} eventos nuevos añadidos")
-    except ImportError:
-        pass
-    except Exception as e:
-        print(f"  ⚠️ Agente Coordinador: {type(e).__name__}: {e}")
+    # (Eliminado el tail manual: Telegram, Facebook Dorks, Instagram Dorks,
+    # MCP Organizador y Agente Coordinador YA son plugins de este mismo
+    # pool o pasos de main.py. El tail los ejecutaba una SEGUNDA vez
+    # (~6 min/ciclo) e Instagram/Facebook Dorks pese a estar desactivados
+    # en config_modulos.json.)
 
     # Deduplicación global: solo eventos no vistos (ni en caché ni en CSV)
     nuevos = dedup.filtrar_nuevos(todos_nuevos)
