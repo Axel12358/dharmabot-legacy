@@ -89,13 +89,20 @@ def scrape_facebook_groups(config=None):
     """Función principal sync (ejecutada con asyncio.to_thread)."""
     if config is None:
         config = {}
+    if not config.get("activo", True):
+        print("⏭️  Modulo grupos FB desactivado (config activo=false)")
+        return []
+    # SIN sesión (fb_state.json) el endpoint facebook.com/search/groups exige
+    # login obligatorio: es muro garantizado + honeypot anti-bot con IP real.
+    # Regla del proyecto: NUNCA golpear ese endpoint sin sesión.
+    state_file = "fb_state.json"
+    _st_path = os.path.join(os.getcwd(), state_file)
+    if not os.path.exists(_st_path):
+        print("⏭️  Sin fb_state.json (login) → omito búsqueda de grupos FB "
+              "(login-wall garantizado, IP real en juego)")
+        return []
     queries = generar_queries(config)
     print(f"🔍 Generadas {len(queries)} queries (sync)")
-    
-    # Estado de login (si no existe, se intenta sin login)
-    state_file = "fb_state.json"
-    if not os.path.exists(state_file):
-        print("⚠️ No hay estado de login. Intentando sin login...")
     
     events = []
     seen_groups = set()

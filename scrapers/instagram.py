@@ -252,7 +252,11 @@ def _parsear_posts_desde_json(json_data: Dict) -> List[Dict]:
 
     # 1) Buqueda dirigida: cualquier diccionario con edge_hashtag_to_top_posts/
     #    edge_hashtag_to_media (vive bajo graphql.hashtag o graph.hashtag).
-    def buscar_directo(obj):
+    sys.setrecursionlimit(max(sys.getrecursionlimit(), 10000))
+
+    def buscar_directo(obj, _prof=0):
+        if _prof > 5000:
+            return
         if isinstance(obj, dict):
             for clave in ("edge_hashtag_to_top_posts", "edge_hashtag_to_media",
                           "edge_hashtag_to_recent_media"):
@@ -270,15 +274,17 @@ def _parsear_posts_desde_json(json_data: Dict) -> List[Dict]:
                             loc = node["location"].get("name", "") or ""
                         _agregar(sc, cap, loc)
             for v in obj.values():
-                buscar_directo(v)
+                buscar_directo(v, _prof + 1)
         elif isinstance(obj, list):
             for item in obj:
-                buscar_directo(item)
+                buscar_directo(item, _prof + 1)
 
     buscar_directo(json_data)
 
     # 2) Cuadro recursivo genérico (cubre GraphImage/GraphVideo/GraphSidecar).
-    def recurse(obj):
+    def recurse(obj, _prof=0):
+        if _prof > 5000:
+            return
         if isinstance(obj, dict):
             if obj.get("__typename") in ("GraphImage", "GraphSidecar", "GraphVideo"):
                 shortcode = obj.get("shortcode")
@@ -287,10 +293,10 @@ def _parsear_posts_desde_json(json_data: Dict) -> List[Dict]:
                 location = obj.get("location", {}).get("name", "") if obj.get("location") else ""
                 _agregar(shortcode, caption, location)
             for v in obj.values():
-                recurse(v)
+                recurse(v, _prof + 1)
         elif isinstance(obj, list):
             for item in obj:
-                recurse(item)
+                recurse(item, _prof + 1)
 
     recurse(json_data)
     return posts

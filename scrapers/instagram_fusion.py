@@ -379,7 +379,7 @@ ESTRATEGIAS_DISPONIBLES = {
 }
 
 def scrape_instagram_fusion(
-    hashtags: List[str],
+    hashtags: Optional[List[str]] = None,
     max_posts_per_tag: int = 20,
     use_tor: bool = True,
     estrategias_habilitadas: Optional[List[str]] = None,
@@ -388,18 +388,24 @@ def scrape_instagram_fusion(
 ) -> List[Dict]:
     """
     Fusion scraper principal.
-    
+
     Args:
-        hashtags: Lista de hashtags (sin #)
+        hashtags: Lista de hashtags (sin #). Si no se pasa (None), se generan
+            desde config_grupos.json vía _build_hashtags (compat auto-descubrimiento).
         max_posts_per_tag: Máx posts por hashtag por estrategia
         use_tor: Usar Tor donde la estrategia lo soporte
         estrategias_habilitadas: Lista de keys de ESTRATEGIAS_DISPONIBLES (None = todas)
         parallel: Ejecutar estrategias en paralelo (ThreadPoolExecutor)
         max_workers: Workers máximos en paralelo
-    
+
     Returns:
         Lista de eventos deduplicados
     """
+    if not hashtags:
+        from scrapers.instagram_scraper import _build_hashtags, _load_config
+        _cfg = _load_config()
+        hashtags = _build_hashtags(_cfg)[:20]
+        print(f"   🔖 Hashtags auto-generados: {len(hashtags)}", flush=True)
     if estrategias_habilitadas is None:
         estrategias_habilitadas = list(ESTRATEGIAS_DISPONIBLES.keys())
     

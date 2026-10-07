@@ -800,8 +800,8 @@ def scrape_instagram_events_v2(config: Optional[dict] = None) -> List[Dict]:
         Lista de eventos validados y enriquecidos
     """
     if run_improvement_loop is None:
-        print("⚠️ ImprovementLoop no disponible, usando versión legacy")
-        return scrape_instagram_events(config)
+        print("⚠️ ImprovementLoop no disponible, usando versión legacy", flush=True)
+        return _scrape_instagram_events_legacy(config)
 
     # Extraer params del config
     max_hashtags = config.get("max_hashtags", 20) if config else 20
@@ -825,9 +825,9 @@ def scrape_instagram_events_v2(config: Optional[dict] = None) -> List[Dict]:
         )
         return eventos
     except Exception as e:
-        print(f"⚠️ ImprovementLoop falló: {type(e).__name__}: {e}")
-        print("   Fallback a versión legacy...")
-        return scrape_instagram_events(config)
+        print(f"⚠️ ImprovementLoop falló: {type(e).__name__}: {e}", flush=True)
+        print("   Fallback a versión legacy...", flush=True)
+        return _scrape_instagram_events_legacy(config)
 
 
 # Mantener compatibilidad: scrape_instagram_events usa v2 por defecto
