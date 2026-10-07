@@ -129,7 +129,7 @@ try:
 except Exception:
     _EXTRACTOR = None
 
-# --- Cliente HTTP con curl_cffi + Tor (mismo patrón que facebook_mcp) ---
+# --- Cliente HTTP con curl_cffi + Tor ---
 try:
     from core.http_client import get_html as _get_html_tor
 except Exception:

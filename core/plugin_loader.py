@@ -52,25 +52,11 @@ MODULOS_ESPECIALES = {
         "timeout": 120,
         "tipo": "eventos",
     },
-    "mcp_organizador": {
-        "modulo": "core.mcp_organizador",
-        "atributo": "ejecutar_mcp_dorks",
-        "timeout": 120,
-        "tipo": "eventos",
-    },
     "enriquecer_fb_og": {
         "modulo": "scrapers.enriquecer_eventos",
         "atributo": "enriquecer_eventos",
         "timeout": 180,
         "tipo": "enriquecer",  # No crea eventos, enriquece los existentes
-    },
-    # --- Scrapers con firma no estándar (kwargs especiales o nombre != scrape_*) ---
-    "facebook_mcp": {
-        "modulo": "scrapers.facebook_mcp",
-        "atributo": "scrape_facebook_events",
-        "timeout": 900,  # SERP + visitas, muy pesado
-        "tipo": "eventos",
-        "kwargs_default": {"max_keywords": 12, "max_visitas": 20},
     },
     "resident_advisor": {
         "modulo": "scrapers.resident_advisor",

@@ -105,12 +105,6 @@ def _construir_SCRAPERS_HARDCODED() -> Dict[str, Dict[str, Any]]:
             "funcion": lambda: _importar("scrapers.partyflock", "scrape_partyflock")(),
             "timeout": 180,
         },
-        "facebook": {
-            "funcion": lambda: _importar("scrapers.facebook_mcp", "scrape_facebook_events")(
-                max_keywords=12, max_visitas=20
-            ),
-            "timeout": 900,
-        },
         "instagram": {
             "funcion": lambda: _importar("scrapers.instagram_scraper", "scrape_instagram_events")(
                 timeout=TIMEOUT_DEFECTO,

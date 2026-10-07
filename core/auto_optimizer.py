@@ -52,11 +52,9 @@ SCRAPER_META = {
     "setline":              {"tipo": "scraping", "costo": 3},
     "psychill_space":       {"tipo": "scraping", "costo": 3},
     # LLM / Agentes
-    "mcp_organizador":      {"tipo": "agente", "costo": 2},
     "dorks_resultados":     {"tipo": "agente", "costo": 1},
     # Pesados (login)
     "telegram":             {"tipo": "pesado", "costo": 4},
-    "facebook_mcp":         {"tipo": "pesado", "costo": 5},
     "instagram_scraper":    {"tipo": "pesado", "costo": 5},
     "fb_playwright_tor":    {"tipo": "pesado", "costo": 5},
 }

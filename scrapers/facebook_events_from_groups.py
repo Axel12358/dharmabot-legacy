@@ -74,11 +74,7 @@ HTTP_BUDGET_SEC = 30
 MAX_RESULTS_POR_GRUPO = 3
 LOGIN_MARKERS = ["login.php", "iniciar sesión", "log in", "crear cuenta", "sign up"]
 
-try:
-    from scrapers.facebook_mcp import SUBGENERO_ALIASES, SUBGENERO_ETIQUETAS
-except Exception:
-    SUBGENERO_ALIASES = {}
-    SUBGENERO_ETIQUETAS = {}
+from scrapers.facebook_constants import SUBGENERO_ALIASES, SUBGENERO_ETIQUETAS
 
 
 # --------------------------------------------------------------------------
@@ -851,15 +847,6 @@ def run_pipeline(config: Optional[dict] = None) -> List[Dict]:
 
 
 if __name__ == "__main__":
-    if "--setup-cookies" in sys.argv:
-        try:
-            from scrapers.facebook_mcp import setup_cookies
-        except ImportError:
-            print("❌ No se pudo importar setup_cookies de facebook_mcp.")
-            sys.exit(1)
-        setup_cookies()
-        sys.exit(0)
-
     eventos = run_pipeline()
     print(f"\nTotal eventos reales: {len(eventos)}")
     for ev in eventos[:10]:

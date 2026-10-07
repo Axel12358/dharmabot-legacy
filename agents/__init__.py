@@ -52,20 +52,10 @@ def _leer_json(path: str) -> Any:
 # ---------------------------------------------------------------------------
 # Subagentes de red (scrapers existentes, integrados sin modificar)
 # ---------------------------------------------------------------------------
-def facebook_events_agent(max_keywords: int = 12, max_visitas: int = 20) -> Dict:
-    """Facebook: búsqueda pública MCP + pipeline de grupos."""
+def facebook_events_agent() -> Dict:
+    """Facebook: pipeline de grupos."""
     eventos: List[Dict] = []
     detalle: Dict[str, Any] = {}
-    try:
-        from scrapers.facebook_mcp import scrape_facebook_events
-        t = time.time()
-        evs = scrape_facebook_events(max_keywords=max_keywords,
-                                     max_visitas=max_visitas) or []
-        eventos.extend(evs)
-        detalle["facebook_mcp"] = len(evs)
-        detalle["facebook_mcp_tiempo_s"] = round(time.time() - t, 1)
-    except Exception as e:
-        detalle["facebook_mcp_error"] = f"{type(e).__name__}: {e}"
     try:
         from scrapers.facebook_events_from_groups import run_pipeline
         t = time.time()

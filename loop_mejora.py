@@ -141,7 +141,6 @@ async def _fuentes_estaticas(incluir):
 
 async def _ejecutar_iteracion(combo, ciudades_lista, estaticas, incluir, pesos):
     from scrapers.resident_advisor import scrape_ra, set_parametros_loop
-    from scrapers.facebook_mcp import scrape_facebook_events
 
     n = combo["lote_ciudades"]
     subset = ciudades_lista[:n]
@@ -159,14 +158,6 @@ async def _ejecutar_iteracion(combo, ciudades_lista, estaticas, incluir, pesos):
     if incluir.get("resident_advisor", True):
         evs = await asyncio.to_thread(scrape_ra)
         print(f"   RA: {len(evs or [])} eventos ({n} ciudades)")
-        eventos.extend(evs or [])
-
-    if incluir.get("facebook", True):
-        evs = await scrape_facebook_events(
-            max_keywords=combo["max_keywords"],
-            max_visitas=combo["max_visitas"],
-        )
-        print(f"   Facebook: {len(evs or [])} eventos")
         eventos.extend(evs or [])
 
     duracion = time.time() - t0
@@ -326,9 +317,7 @@ async def main():
         # Reversible: restablece cualquier límite residual
         try:
             from scrapers.resident_advisor import set_parametros_loop
-            from scrapers.facebook_mcp import set_limites_loop
             set_parametros_loop(ciudades=None, max_eventos=None, horizonte_meses=None)
-            set_limites_loop(max_keywords=None, max_visitas=None)
         except Exception:
             pass
 
@@ -354,7 +343,6 @@ async def main():
     if mejor and incluir.get("resident_advisor", True):
         try:
             from scrapers.resident_advisor import scrape_ra, set_parametros_loop
-            from scrapers.facebook_mcp import scrape_facebook_events
             n = mejor["configuracion"]["lote_ciudades"]
             set_parametros_loop(ciudades=ciudades_lista[:n],
                                 max_eventos=mejor["configuracion"]["max_eventos"],
@@ -364,15 +352,6 @@ async def main():
             evs = await asyncio.to_thread(scrape_ra)
             eventos_final.extend(evs or [])
             set_parametros_loop(ciudades=None, max_eventos=None, horizonte_meses=None)
-            if incluir.get("facebook", True):
-                try:
-                    evs = await scrape_facebook_events(
-                        max_keywords=mejor["configuracion"]["max_keywords"],
-                        max_visitas=mejor["configuracion"]["max_visitas"],
-                    )
-                    eventos_final.extend(evs or [])
-                except Exception as e:
-                    print(f"   ⚠️ Facebook en CSV: error (flujo continúa): {e}")
             save_csv(eventos_final, cfg.get("csv", "eventos_encontrados.csv"))
         except Exception as e:
             print(f"   ⚠️ Error generando CSV: {e}")

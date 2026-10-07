@@ -18,9 +18,9 @@
     "tiempo_total": 33.96
   },
   "grupos_conocidos": {
-    "intentos": 19,
+    "intentos": 21,
     "aciertos": 19,
     "total_eventos": 470,
-    "tiempo_total": 0.06
+    "tiempo_total": 65.63
   }
 }

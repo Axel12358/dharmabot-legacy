@@ -48,7 +48,7 @@ OUTPUT_FILE = str(Path(_PROJECT_ROOT) / "eventos_facebook_publicos.json")
 
 from scrapers.event_extractor import EventExtractor
 from scrapers.anti_block import get_anti_block
-from scrapers.facebook_mcp import SUBGENERO_ALIASES
+from scrapers.facebook_constants import SUBGENERO_ALIASES
 
 TIMEOUT_POR_EVENTO = 10
 MAX_INTENTOS = 3

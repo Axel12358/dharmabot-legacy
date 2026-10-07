@@ -36,7 +36,6 @@ from scrapers.meetup_psy import scrape_meetup_psy
 # Scrapers existentes (consolidados en main.py)
 from scrapers import scrape_goabase, scrape_songkick
 from scrapers import scrape_ra
-from scrapers.facebook_mcp import scrape_facebook_events
 
 OUTPUT_LIMPIO = "eventos_psytrance.csv"
 OUTPUT_TODOS = "eventos_encontrados.csv"
@@ -261,23 +260,6 @@ async def ejecutar_fuentes_nuevas():
         print("  ⚠️ Eventbrite: timeout (90s) — omitido")
     except Exception as e:
         print(f"  ❌ Eventbrite: {e}")
-
-    # --- Facebook (SERP público + grupos) ---
-    # Siempre se ejecuta: max_keywords=12, max_visitas=20, timeout 900s (15 min)
-    try:
-        evs = await asyncio.wait_for(
-            scrape_facebook_events(max_keywords=12, max_visitas=20),
-            timeout=900
-        )
-        if evs:
-            print(f"  ✅ Facebook: {len(evs)} eventos")
-            todos.extend(evs)
-        else:
-            print("  ⚠️ Facebook: 0 eventos")
-    except asyncio.TimeoutError:
-        print("  ⚠️ Facebook: timeout (900s) — omitido")
-    except Exception as e:
-        print(f"  ❌ Facebook: {e}")
 
     return todos
 

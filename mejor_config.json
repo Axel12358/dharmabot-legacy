@@ -1,19 +1,47 @@
 {
-  "config": {
-    "max_hashtags": 26,
-    "max_posts_por_hashtag": 15,
-    "timeout_total": 180,
-    "priorizar_requests": true,
-    "priorizar_playwright": true,
-    "usar_tor": true
+  "timestamp": "2026-09-02T18:59:17.871496+00:00",
+  "nombre": "actual",
+  "configuracion": {
+    "goabase": true,
+    "songkick": true,
+    "resident_advisor": true,
+    "telegram": true,
+    "reddit": true,
+    "psytrance_pl": true,
+    "isratrance": true,
+    "ektoplazm": true,
+    "meetup": true,
+    "facebook_events_from_groups": false,
+    "facebook_dorks": true,
+    "instagram_dorks": false,
+    "dorks_resultados": false,
+    "enriquecer_fb_og": false,
+    "edmdancedirectory": true,
+    "psytrancefestivals_tv": true,
+    "psymedia": true,
+    "setline": true,
+    "psychill_space": true
   },
-  "metricas": {
-    "total_eventos": 0,
-    "tiempo_total": 119.4,
-    "hashtags_procesados": 26,
-    "hashtags_productivos": 0,
-    "tiene_sesion": false,
-    "tor_activo": true
-  },
-  "timestamp": "2026-07-31T16:01:43.070555"
+  "score": 984.9,
+  "csv_stats": {
+    "total": 1462,
+    "emails": 1462,
+    "por_fuente": {
+      "Goabase": 345,
+      "Songkick": 1,
+      "Resident Advisor": 785,
+      "Facebook (dorks)": 154,
+      "Reddit": 11,
+      "Psytrance.pl": 6,
+      "Ektoplazm": 3,
+      "Meetup": 1,
+      "Telegram": 34,
+      "Facebook (público SERP)": 22,
+      "Psymedia": 21,
+      "Setline": 27,
+      "Psychill Space": 2,
+      "Facebook": 40,
+      "Instagram (prueba)": 10
+    }
+  }
 }

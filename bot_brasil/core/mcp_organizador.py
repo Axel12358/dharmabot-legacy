@@ -28,6 +28,7 @@ import json
 import os
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set
@@ -120,9 +121,11 @@ class MCPOrganizador:
         if _check_searxng_available():
             motores.append("searxng")
         # Google Playwright if Playwright installed
-        import importlib.util
-        if importlib.util.find_spec("playwright") is not None:
+        try:
+            import playwright
             motores.append("google_playwright")
+        except ImportError:
+            pass
         # Rest of cascade
         for m in ["startpage", "mojeek", "ddg", "bing"]:
             motores.append(m)
@@ -157,20 +160,12 @@ class MCPOrganizador:
         )
 
         # Instagram Posts + Profiles (via dorks_resultados): TERCERO
-        # Respeta config_modulos.json: si instagram_dorks está desactivado no
-        # se lanza (medido: 1032s de CAPTCHA por ciclo para 0 eventos).
-        try:
-            with open(Path(_PROJECT_ROOT) / "config_modulos.json",
-                      encoding="utf-8") as _f:
-                _activos = json.load(_f).get("activos", {})
-        except (OSError, json.JSONDecodeError):
-            _activos = {}
         self.registrar_fuente(
             "instagram_dorks",
             dorks_generator=self._generar_dorks_instagram,
             motores=list(self._motores_disponibles),
             timeout=120,
-            habilitado=bool(_activos.get("instagram_dorks", True)),
+            habilitado=True,
         )
 
     # Orden de ejecución secuencial de las fuentes por defecto (1º a 3º).

@@ -1,0 +1,54 @@
+use_default_settings: true
+general:
+  debug: false
+search:
+  formats:
+    - html
+    - json
+  request_delay:
+    google: [9, 13]
+    google cse: [9, 13]
+    bing: [5, 9]
+    duckduckgo: [5, 9]
+    brave: [7, 11]
+    mojeek: [5, 8]
+    startpage: [6, 9]
+    yahoo: [5, 8]
+server:
+  secret_key: "dharmadhatu-searxng-2026-local"
+  bind_address: "0.0.0.0"
+  port: 8080
+  image_proxy: false
+  limiter: false
+ui:
+  static_use_hash: true
+redis:
+  enabled: false
+engines:
+  - name: google
+    engine: google
+    shortcut: google
+  - name: google cse
+    engine: google_cse
+    disabled: true
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: ddg
+  - name: bing
+    engine: bing
+    shortcut: bing
+  - name: brave
+    engine: brave
+    shortcut: brave
+  - name: google
+    engine: google
+    shortcut: google
+  - name: startpage
+    engine: startpage
+    shortcut: startpage
+  - name: mojeek
+    engine: mojeek
+    shortcut: mojeek
+  - name: yahoo
+    engine: yahoo
+    shortcut: yahoo

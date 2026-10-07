@@ -14,7 +14,6 @@ Es idempotente: re-ejecutar no duplica eventos en el CSV.
 
 from __future__ import annotations
 
-import asyncio
 import csv
 import json
 import os
@@ -29,7 +28,6 @@ from core.task_queue import TaskQueue
 
 from scrapers import (
     scrape_goabase, scrape_ra,
-    scrape_facebook_events,
     scrape_reddit_psy, scrape_psytrance_pl, scrape_isratrance,
     scrape_ektoplazm, scrape_meetup_psy
 )
@@ -39,8 +37,6 @@ from scrapers.telegram.scraper import scrape_telegram_events
 FUNCION_SUBAGENTES: Dict[str, Callable[[], Dict]] = {
     "goabase": scrape_goabase,
     "resident_advisor": scrape_ra,
-    "facebook_mcp": lambda: asyncio.run(scrape_facebook_events()),
-    "facebook_events_from_groups": lambda: asyncio.run(scrape_facebook_events()),
     "telegram": scrape_telegram_events,
     "reddit": scrape_reddit_psy,
     "psytrance_pl": scrape_psytrance_pl,
@@ -61,8 +57,6 @@ TIMEOUT_DEFECTO = 300
 # Timeouts por tipo de subagente (segundos)
 TIMEOUTS_POR_AGENTE = {
     "resident_advisor": 300,
-    "facebook_mcp": 30,
-    "facebook_events_from_groups": 30,
     "telegram": 120,
     "reddit": 3,
     "psytrance_pl": 3,

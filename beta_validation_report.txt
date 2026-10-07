@@ -1,0 +1,1 @@
+/Users/angelgarcia/dharmabot/.venv/bin/python: can't open file '/Users/angelgarcia/dharmabot/validate_beta_readiness.py': [Errno 2] No such file or directory

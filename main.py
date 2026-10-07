@@ -8,7 +8,6 @@ import json
 import os
 from scrapers import scrape_goabase, scrape_songkick
 from scrapers import scrape_ra
-from scrapers.facebook_mcp import scrape_facebook_events
 from utils.helpers import save_csv
 from scrapers.event_extractor import EventExtractor
 from utils import geo_utils
@@ -107,26 +106,7 @@ async def main():
     except Exception as e:
         print(f"   ❌ Error en Songkick: {e}")
     
-    # 3. Facebook (solo si está activo en config_modulos.json)
-    if CONFIG_MOD.get("facebook_mcp", False) or CONFIG_MOD.get("facebook_events_from_groups", False):
-        print("\n📱 Scraping Facebook (grupos + búsqueda pública)...")
-        try:
-            facebook_events = await asyncio.wait_for(
-                scrape_facebook_events(), timeout=180
-            )
-            if facebook_events:
-                print(f"   ✅ {len(facebook_events)} eventos encontrados")
-                eventos.extend(facebook_events)
-            else:
-                print("   ⚠️ No se encontraron eventos en Facebook")
-        except asyncio.TimeoutError:
-            print("   ⚠️ Facebook timeout (180s) — continuando con resultados parciales")
-        except Exception as e:
-            print(f"   ❌ Error en Facebook: {e}")
-    else:
-        print("\n📱 Facebook desactivado en config_modulos.json — omitido")
-    
-    # 4. Resident Advisor (GraphQL, sin login)
+    # 3. Resident Advisor (GraphQL, sin login)
     print("\n🌐 Scraping Resident Advisor...")
     try:
         ra_events = await asyncio.to_thread(scrape_ra)
@@ -171,16 +151,14 @@ async def main():
     else:
         print("\n⚠️ No se encontraron eventos en ninguna fuente")
 
-# ---- Loop Central de Optimización (aditivo, no intrusivo) ----
+    # ---- Loop Central de Optimización (aditivo, no intrusivo) ----
     # El orquestrador ejecuta los módulos de dorks (facebook_dorks, etc.) y
     # otros scrapers adicionales con dedup global, sumando eventos nuevos al
     # CSV de forma aditiva (nunca borra datos). Se ejecuta si CUALQUIERA de
-    # sus módulos está activo en config_modulos.json. Antes se omitía cuando
-    # facebook_mcp/facebook_events_from_groups/instagram_dorks estaban en
-    # False, lo que dejaba los dorks DESACTIVADOS aunque facebook_dorks=True.
+    # sus módulos está activo en config_modulos.json.
     _mods_orquestrador = (
-        "facebook_mcp", "facebook_events_from_groups", "facebook_dorks",
-        "instagram_dorks", "dorks_resultados", "mcp_organizador",
+        "facebook_events_from_groups", "facebook_dorks",
+        "instagram_dorks", "dorks_resultados",
     )
     _debe_orquestar = any(CONFIG_MOD.get(m, False) for m in _mods_orquestrador)
     if _debe_orquestar:
@@ -280,21 +258,6 @@ async def main():
             print(f"   ⚠️ Instagram Dorks no disponible: {type(e).__name__}: {e}")
     else:
         print("\n🔍 Instagram Dorks desactivado en config_modulos.json — omitido")
-
-    # ---- MCP Organizador (motor central de dorks) — opcional y aditiva ----
-    if CONFIG_MOD.get("mcp_organizador", False):
-        try:
-            from pathlib import Path as _P
-            if _P(__file__).resolve().parent.joinpath(
-                    "core", "mcp_organizador.py").exists():
-                print("\n🔧 MCP Organizador (motor central de dorks)...")
-                from core.mcp_organizador import ejecutar_mcp_dorks
-                _evs_mcp = ejecutar_mcp_dorks()
-                print(f"   ➕ {len(_evs_mcp)} eventos de MCP Organizador")
-        except Exception as e:
-            print(f"   ⚠️ MCP Organizador no disponible: {type(e).__name__}: {e}")
-    else:
-        print("\n🔧 MCP Organizador desactivado en config_modulos.json — omitido")
 
     # ---- Agente Coordinador (Sistema Multiagente Ligero) — opcional y aditiva ----
     # Si core/agente_coordinador.py existe, ejecuta los subagentes en paralelo

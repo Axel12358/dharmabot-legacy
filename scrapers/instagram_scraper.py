@@ -3,7 +3,7 @@
 Extractor de eventos de música (especialmente psYTrance) desde Instagram.
 
 Filosofía: **suma, nunca resta**. No modifica ni deshabilita ningún scraper
-existente (goabase, songkick, resident_advisor, facebook_mcp,
+existente (goabase, songkick, resident_advisor,
 facebook_events_from_groups). Este módulo es totalmente aditivo.
 
 Estrategia combinada (ver análisis de referencia):
