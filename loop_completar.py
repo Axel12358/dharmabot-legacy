@@ -68,6 +68,24 @@ def es_nombre_spam(nombre):
     return bool(SPAM_NAME_PAT.search(nombre))
 
 
+def _dorks_activos():
+    """True si algún dork FB/IG está activo en config_modulos.json.
+
+    El frente de org FB (2a/2b) se alimenta de los batches de dorks
+    (site:facebook.com/events ...). Con los dorks apagados su yield medido
+    es ~0: se pausa y el presupuesto va al frente email (que sí rinde).
+    """
+    try:
+        import json as _json, os as _os
+        _p = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                           "config_modulos.json")
+        _act = _json.load(open(_p, encoding="utf-8")).get("activos", {})
+        return any(_act.get(m, False) for m in
+                   ("facebook_dorks", "instagram_dorks", "dorks_resultados"))
+    except Exception:
+        return True  # sin config no se frena (comportamiento previo)
+
+
 # Nombres genéricos que NO revelan organizador (no enriquecibles)
 GENERIC_ORG_WORDS = {
     'dark', 'psy', 'forest', 'hi-tech', 'suomi', 'goa', 'goatrance',
@@ -856,10 +874,11 @@ def main():
                        e.get('fuente','') not in ('Facebook','Facebook (matriz)','Instagram (prueba)','Psytrance.pl','Facebook (dorks)')]
         log(f"Sin organizador: {len(sin_org)} total, {len(sin_org_fb)} minables (incl. cola FB genérica), {len(sin_org_gen)} genéricos no-FB (omitidos)")
         
-        if sin_org_fb:
+        _dorks = _dorks_activos()
+        if sin_org_fb and _dorks:
             # Rama 2a: org por nombre vía DDG → yield medido ~0 (los nombres
-            # genéricos de FB no tienen presencia en buscadores). Presupuesto
-            # pequeño: el grueso del ataque org va por el barrido SERP (2b).
+            # genéricos de FB no tienen presencia en buscadores). Solo corre si
+            # los dorks FB/IG están activos (su feed alimenta este frente).
             presupuesto_2a = min(40, BATCH, len(sin_org_fb))
             log(f"Procesando {presupuesto_2a} eventos FB/IG enriquecibles (org/2a)...")
             cambios = procesar_batch(sin_org_fb, 'org', presupuesto_2a, offset=iteration*BATCH)
@@ -889,22 +908,25 @@ def main():
             ciudades_ahora = [pend.pop() for _ in range(min(8, len(pend)))]
             pend[:0] = ciudades_ahora                              # rotar al frente
             log(f"  🌆 Barrido SERP por ciudad: {ciudades_ahora}")
-            try:
-                anios_ciud = {c: [y for y, _ in _years[c].most_common(2)] for c in ciudades_ahora if c in _years}
-                sub_ciud = {}
-                for r in sin_org:
-                    if (r.get('lugar', '') or '').strip() in ciudades_ahora and 'Facebook' in r.get('fuente', ''):
-                        sg = (r.get('subgenero', '') or '').strip()
-                        if sg and sg.lower() != 'n/a':
-                            sub_ciud.setdefault((r.get('lugar', '') or '').strip(), _C()).update([sg])
-                mapa = {}
-                for c in ciudades_ahora:
-                    subs = [sg for sg, _ in sub_ciud[c].most_common(4)] if c in sub_ciud else []
-                    mapa.update(minar_organizadores_fb_serp([c], anios=anios_ciud.get(c, []),
-                                                            subgeneros=subs, max_por_ciclo=1))
-            except Exception as e:
-                mapa = {}
-                log(f"  ⚠️ Barrido SERP error: {str(e)[:80]}")
+            mapa = {}
+            if _dorks:
+                try:
+                    anios_ciud = {c: [y for y, _ in _years[c].most_common(2)] for c in ciudades_ahora if c in _years}
+                    sub_ciud = {}
+                    for r in sin_org:
+                        if (r.get('lugar', '') or '').strip() in ciudades_ahora and 'Facebook' in r.get('fuente', ''):
+                            sg = (r.get('subgenero', '') or '').strip()
+                            if sg and sg.lower() != 'n/a':
+                                sub_ciud.setdefault((r.get('lugar', '') or '').strip(), _C()).update([sg])
+                    for c in ciudades_ahora:
+                        subs = [sg for sg, _ in sub_ciud[c].most_common(4)] if c in sub_ciud else []
+                        mapa.update(minar_organizadores_fb_serp([c], anios=anios_ciud.get(c, []),
+                                                                subgeneros=subs, max_por_ciclo=1))
+                except Exception as e:
+                    mapa = {}
+                    log(f"  ⚠️ Barrido SERP error: {str(e)[:80]}")
+            else:
+                log("  🌆 Frente FB-org SERP en pausa: dorks FB/IG apagados (yield ~0 medido) → presupuesto al frente email")
             ganado = 0
             mejorado = 0
             if mapa:
