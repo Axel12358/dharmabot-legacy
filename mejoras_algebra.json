@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-07T17:12:36.990800",
+  "timestamp": "2026-10-08T00:03:57.571183",
   "csv": "/Users/angelgarcia/dharmabot/eventos_encontrados.csv",
   "aplicar_cambios": true,
   "duplicados_semanticos": [
@@ -91,13 +91,13 @@
       "conservado": "progressive party",
       "eliminado": "progressive party",
       "similitud": 1.0,
-      "fecha": "2026-08-21"
+      "fecha": "2026-08-22"
     },
     {
       "conservado": "progressive party",
       "eliminado": "progressive party",
       "similitud": 1.0,
-      "fecha": "2026-08-22"
+      "fecha": "2026-08-21"
     },
     {
       "conservado": "dark party",
@@ -139,31 +139,31 @@
       "conservado": "goa gathering",
       "eliminado": "goa gathering",
       "similitud": 1.0,
+      "fecha": "2026-09-05"
+    },
+    {
+      "conservado": "goa gathering",
+      "eliminado": "goa gathering",
+      "similitud": 1.0,
+      "fecha": "2026-09-05"
+    },
+    {
+      "conservado": "goa gathering",
+      "eliminado": "goa gathering",
+      "similitud": 1.0,
       "fecha": "2026-09-06"
-    },
-    {
-      "conservado": "goa gathering",
-      "eliminado": "goa gathering",
-      "similitud": 1.0,
-      "fecha": "2026-09-05"
-    },
-    {
-      "conservado": "goa gathering",
-      "eliminado": "goa gathering",
-      "similitud": 1.0,
-      "fecha": "2026-09-05"
-    },
-    {
-      "conservado": "psy trance rave",
-      "eliminado": "psy trance rave",
-      "similitud": 1.0,
-      "fecha": "2026-05-15"
     },
     {
       "conservado": "psy trance rave",
       "eliminado": "psy trance rave",
       "similitud": 1.0,
       "fecha": "2026-05-16"
+    },
+    {
+      "conservado": "psy trance rave",
+      "eliminado": "psy trance rave",
+      "similitud": 1.0,
+      "fecha": "2026-05-15"
     },
     {
       "conservado": "psy trance rave",
@@ -211,7 +211,7 @@
       "conservado": "goa trance rave",
       "eliminado": "goa trance rave",
       "similitud": 1.0,
-      "fecha": "2025-02-23"
+      "fecha": "2025-02-22"
     },
     {
       "conservado": "goa trance rave",
@@ -223,7 +223,7 @@
       "conservado": "goa trance rave",
       "eliminado": "goa trance rave",
       "similitud": 1.0,
-      "fecha": "2025-02-22"
+      "fecha": "2025-02-23"
     },
     {
       "conservado": "goa trance rave",
@@ -235,13 +235,13 @@
       "conservado": "suomi festival",
       "eliminado": "suomi festival",
       "similitud": 1.0,
-      "fecha": "2026-08-28"
+      "fecha": "2026-08-27"
     },
     {
       "conservado": "suomi festival",
       "eliminado": "suomi festival",
       "similitud": 1.0,
-      "fecha": "2026-08-27"
+      "fecha": "2026-08-28"
     },
     {
       "conservado": "suomi festival",
@@ -355,13 +355,13 @@
       "conservado": "dark psy gathering",
       "eliminado": "dark-psy gathering",
       "similitud": 1.0,
-      "fecha": "2025-01-26"
+      "fecha": "2025-01-24"
     },
     {
       "conservado": "dark psy gathering",
       "eliminado": "dark-psy gathering",
       "similitud": 1.0,
-      "fecha": "2025-01-24"
+      "fecha": "2025-01-26"
     },
     {
       "conservado": "dark psy gathering",
@@ -499,19 +499,19 @@
       "conservado": "forest psy festival",
       "eliminado": "forest psy festival",
       "similitud": 1.0,
+      "fecha": "2026-07-25"
+    },
+    {
+      "conservado": "forest psy festival",
+      "eliminado": "forest psy festival",
+      "similitud": 1.0,
+      "fecha": "2026-07-25"
+    },
+    {
+      "conservado": "forest psy festival",
+      "eliminado": "forest psy festival",
+      "similitud": 1.0,
       "fecha": "2026-07-24"
-    },
-    {
-      "conservado": "forest psy festival",
-      "eliminado": "forest psy festival",
-      "similitud": 1.0,
-      "fecha": "2026-07-25"
-    },
-    {
-      "conservado": "forest psy festival",
-      "eliminado": "forest psy festival",
-      "similitud": 1.0,
-      "fecha": "2026-07-25"
     },
     {
       "conservado": "forest psy festival",
@@ -521,15 +521,15 @@
     },
     {
       "conservado": "forest psy festival",
-      "eliminado": "forest-psy festival",
-      "similitud": 1.0,
-      "fecha": "2026-08-29"
-    },
-    {
-      "conservado": "forest psy festival",
       "eliminado": "forest psy festival",
       "similitud": 1.0,
       "fecha": "2026-08-28"
+    },
+    {
+      "conservado": "forest psy festival",
+      "eliminado": "forest-psy festival",
+      "similitud": 1.0,
+      "fecha": "2026-08-29"
     },
     {
       "conservado": "forest gathering",
@@ -1009,13 +1009,13 @@
       "conservado": "darkpsy party",
       "eliminado": "darkpsy party",
       "similitud": 1.0,
-      "fecha": "2025-03-16"
+      "fecha": "2025-03-14"
     },
     {
       "conservado": "darkpsy party",
       "eliminado": "darkpsy party",
       "similitud": 1.0,
-      "fecha": "2025-03-14"
+      "fecha": "2025-03-16"
     },
     {
       "conservado": "psybient celebration",
@@ -1111,13 +1111,13 @@
       "conservado": "suomi psy rave",
       "eliminado": "suomi psy rave",
       "similitud": 1.0,
-      "fecha": "2026-08-29"
+      "fecha": "2026-08-28"
     },
     {
       "conservado": "suomi psy rave",
       "eliminado": "suomi psy rave",
       "similitud": 1.0,
-      "fecha": "2026-08-28"
+      "fecha": "2026-08-29"
     },
     {
       "conservado": "suomi psy rave",
@@ -1201,13 +1201,13 @@
       "conservado": "goa gathering",
       "eliminado": "goa gathering",
       "similitud": 1.0,
-      "fecha": "2026-08-30"
+      "fecha": "2026-08-29"
     },
     {
       "conservado": "goa gathering",
       "eliminado": "goa gathering",
       "similitud": 1.0,
-      "fecha": "2026-08-29"
+      "fecha": "2026-08-30"
     },
     {
       "conservado": "goa gathering",
@@ -1321,13 +1321,13 @@
       "conservado": "psytrance gathering",
       "eliminado": "psytrance gathering",
       "similitud": 1.0,
-      "fecha": "2025-12-26"
+      "fecha": "2025-12-27"
     },
     {
       "conservado": "psytrance gathering",
       "eliminado": "psytrance gathering",
       "similitud": 1.0,
-      "fecha": "2025-12-27"
+      "fecha": "2025-12-26"
     },
     {
       "conservado": "psytrance gathering",
@@ -1459,13 +1459,13 @@
       "conservado": "prog ceremony",
       "eliminado": "prog ceremony",
       "similitud": 1.0,
-      "fecha": "2026-08-06"
+      "fecha": "2026-08-04"
     },
     {
       "conservado": "prog ceremony",
       "eliminado": "prog ceremony",
       "similitud": 1.0,
-      "fecha": "2026-08-04"
+      "fecha": "2026-08-06"
     },
     {
       "conservado": "prog ceremony",
@@ -1507,13 +1507,13 @@
       "conservado": "full-on party",
       "eliminado": "full-on party",
       "similitud": 1.0,
-      "fecha": "2025-10-03"
+      "fecha": "2025-10-04"
     },
     {
       "conservado": "full-on party",
       "eliminado": "full-on party",
       "similitud": 1.0,
-      "fecha": "2025-10-04"
+      "fecha": "2025-10-03"
     },
     {
       "conservado": "full-on party",
@@ -1777,19 +1777,19 @@
       "conservado": "progressive open air",
       "eliminado": "progressive open air",
       "similitud": 1.0,
-      "fecha": "2026-09-04"
-    },
-    {
-      "conservado": "progressive open air",
-      "eliminado": "progressive open air",
-      "similitud": 1.0,
-      "fecha": "2026-09-04"
-    },
-    {
-      "conservado": "progressive open air",
-      "eliminado": "progressive open air",
-      "similitud": 1.0,
       "fecha": "2026-09-05"
+    },
+    {
+      "conservado": "progressive open air",
+      "eliminado": "progressive open air",
+      "similitud": 1.0,
+      "fecha": "2026-09-04"
+    },
+    {
+      "conservado": "progressive open air",
+      "eliminado": "progressive open air",
+      "similitud": 1.0,
+      "fecha": "2026-09-04"
     },
     {
       "conservado": "progressive open air",
@@ -1825,13 +1825,13 @@
       "conservado": "progressive ritual",
       "eliminado": "progressive ritual",
       "similitud": 1.0,
-      "fecha": "2025-10-30"
+      "fecha": "2025-10-31"
     },
     {
       "conservado": "progressive ritual",
       "eliminado": "progressive ritual",
       "similitud": 1.0,
-      "fecha": "2025-10-31"
+      "fecha": "2025-10-30"
     },
     {
       "conservado": "progressive ritual",
@@ -1861,13 +1861,13 @@
       "conservado": "dark psy festival",
       "eliminado": "dark psy festival",
       "similitud": 1.0,
-      "fecha": "2025-09-07"
+      "fecha": "2025-09-05"
     },
     {
       "conservado": "dark psy festival",
       "eliminado": "dark psy festival",
       "similitud": 1.0,
-      "fecha": "2025-09-05"
+      "fecha": "2025-09-07"
     },
     {
       "conservado": "forest-psy party",
@@ -1909,13 +1909,13 @@
       "conservado": "forest ceremony",
       "eliminado": "forest ceremony",
       "similitud": 1.0,
-      "fecha": "2026-04-11"
+      "fecha": "2026-04-10"
     },
     {
       "conservado": "forest ceremony",
       "eliminado": "forest ceremony",
       "similitud": 1.0,
-      "fecha": "2026-04-10"
+      "fecha": "2026-04-11"
     },
     {
       "conservado": "forest ceremony",
@@ -1945,13 +1945,13 @@
       "conservado": "progressive celebration",
       "eliminado": "progressive celebration",
       "similitud": 1.0,
-      "fecha": "2026-09-01"
+      "fecha": "2026-08-30"
     },
     {
       "conservado": "progressive celebration",
       "eliminado": "progressive celebration",
       "similitud": 1.0,
-      "fecha": "2026-08-30"
+      "fecha": "2026-09-01"
     },
     {
       "conservado": "zenon psy festival",
@@ -1975,13 +1975,13 @@
       "conservado": "prog open air",
       "eliminado": "prog open air",
       "similitud": 1.0,
-      "fecha": "2026-05-23"
+      "fecha": "2026-05-21"
     },
     {
       "conservado": "prog open air",
       "eliminado": "prog open air",
       "similitud": 1.0,
-      "fecha": "2026-05-21"
+      "fecha": "2026-05-23"
     },
     {
       "conservado": "progressive open air",
@@ -2191,13 +2191,13 @@
       "conservado": "progressive open air",
       "eliminado": "progressive open air",
       "similitud": 1.0,
-      "fecha": "2026-09-25"
+      "fecha": "2026-09-26"
     },
     {
       "conservado": "progressive open air",
       "eliminado": "progressive open air",
       "similitud": 1.0,
-      "fecha": "2026-09-26"
+      "fecha": "2026-09-25"
     },
     {
       "conservado": "progressive open air",
@@ -2257,13 +2257,13 @@
       "conservado": "dark psy party",
       "eliminado": "dark psy party",
       "similitud": 1.0,
-      "fecha": "2026-07-03"
+      "fecha": "2026-07-01"
     },
     {
       "conservado": "dark psy party",
       "eliminado": "dark psy party",
       "similitud": 1.0,
-      "fecha": "2026-07-01"
+      "fecha": "2026-07-03"
     },
     {
       "conservado": "dark psy celebration",
@@ -2305,13 +2305,13 @@
       "conservado": "psy trance ritual",
       "eliminado": "psy trance ritual",
       "similitud": 1.0,
-      "fecha": "2025-09-26"
+      "fecha": "2025-09-27"
     },
     {
       "conservado": "psy trance ritual",
       "eliminado": "psy trance ritual",
       "similitud": 1.0,
-      "fecha": "2025-09-27"
+      "fecha": "2025-09-26"
     },
     {
       "conservado": "psytrance festival",
@@ -2347,13 +2347,13 @@
       "conservado": "forest celebration",
       "eliminado": "forest celebration",
       "similitud": 1.0,
-      "fecha": "2026-05-02"
+      "fecha": "2026-04-30"
     },
     {
       "conservado": "forest celebration",
       "eliminado": "forest celebration",
       "similitud": 1.0,
-      "fecha": "2026-04-30"
+      "fecha": "2026-05-02"
     },
     {
       "conservado": "forest celebration",
@@ -2371,25 +2371,25 @@
       "conservado": "forest celebration",
       "eliminado": "forest celebration",
       "similitud": 1.0,
+      "fecha": "2026-06-13"
+    },
+    {
+      "conservado": "forest celebration",
+      "eliminado": "forest celebration",
+      "similitud": 1.0,
+      "fecha": "2026-06-13"
+    },
+    {
+      "conservado": "forest celebration",
+      "eliminado": "forest celebration",
+      "similitud": 1.0,
+      "fecha": "2026-06-13"
+    },
+    {
+      "conservado": "forest celebration",
+      "eliminado": "forest celebration",
+      "similitud": 1.0,
       "fecha": "2026-06-12"
-    },
-    {
-      "conservado": "forest celebration",
-      "eliminado": "forest celebration",
-      "similitud": 1.0,
-      "fecha": "2026-06-13"
-    },
-    {
-      "conservado": "forest celebration",
-      "eliminado": "forest celebration",
-      "similitud": 1.0,
-      "fecha": "2026-06-13"
-    },
-    {
-      "conservado": "forest celebration",
-      "eliminado": "forest celebration",
-      "similitud": 1.0,
-      "fecha": "2026-06-13"
     },
     {
       "conservado": "forest celebration",
@@ -2689,13 +2689,13 @@
       "conservado": "fullon celebration",
       "eliminado": "fullon celebration",
       "similitud": 1.0,
-      "fecha": "2026-06-06"
+      "fecha": "2026-06-05"
     },
     {
       "conservado": "fullon celebration",
       "eliminado": "fullon celebration",
       "similitud": 1.0,
-      "fecha": "2026-06-05"
+      "fecha": "2026-06-06"
     },
     {
       "conservado": "fullon celebration",
@@ -2833,13 +2833,13 @@
       "conservado": "prog ceremony",
       "eliminado": "prog ceremony",
       "similitud": 1.0,
-      "fecha": "2026-08-14"
+      "fecha": "2026-08-12"
     },
     {
       "conservado": "prog ceremony",
       "eliminado": "prog ceremony",
       "similitud": 1.0,
-      "fecha": "2026-08-12"
+      "fecha": "2026-08-14"
     },
     {
       "conservado": "forest psy ceremony",
@@ -3361,25 +3361,25 @@
       "conservado": "forest party",
       "eliminado": "forest party",
       "similitud": 1.0,
-      "fecha": "2025-06-23"
-    },
-    {
-      "conservado": "forest party",
-      "eliminado": "forest party",
-      "similitud": 1.0,
-      "fecha": "2025-06-23"
-    },
-    {
-      "conservado": "forest party",
-      "eliminado": "forest party",
-      "similitud": 1.0,
-      "fecha": "2025-06-23"
-    },
-    {
-      "conservado": "forest party",
-      "eliminado": "forest party",
-      "similitud": 1.0,
       "fecha": "2025-06-24"
+    },
+    {
+      "conservado": "forest party",
+      "eliminado": "forest party",
+      "similitud": 1.0,
+      "fecha": "2025-06-23"
+    },
+    {
+      "conservado": "forest party",
+      "eliminado": "forest party",
+      "similitud": 1.0,
+      "fecha": "2025-06-23"
+    },
+    {
+      "conservado": "forest party",
+      "eliminado": "forest party",
+      "similitud": 1.0,
+      "fecha": "2025-06-23"
     },
     {
       "conservado": "goa party",
@@ -3823,13 +3823,13 @@
       "conservado": "progressive open air",
       "eliminado": "progressive open air",
       "similitud": 1.0,
-      "fecha": "2026-09-20"
+      "fecha": "2026-09-19"
     },
     {
       "conservado": "progressive open air",
       "eliminado": "progressive open air",
       "similitud": 1.0,
-      "fecha": "2026-09-19"
+      "fecha": "2026-09-20"
     },
     {
       "conservado": "psy trance open air",
@@ -4393,13 +4393,13 @@
       "conservado": "hi-tech ritual",
       "eliminado": "hi-tech ritual",
       "similitud": 1.0,
-      "fecha": "2026-09-16"
+      "fecha": "2026-09-17"
     },
     {
       "conservado": "hi-tech ritual",
       "eliminado": "hi-tech ritual",
       "similitud": 1.0,
-      "fecha": "2026-09-17"
+      "fecha": "2026-09-16"
     },
     {
       "conservado": "darkpsy rave",
@@ -5965,13 +5965,13 @@
       "conservado": "forest celebration",
       "eliminado": "forest celebration",
       "similitud": 1.0,
-      "fecha": "2025-08-30"
+      "fecha": "2025-08-31"
     },
     {
       "conservado": "forest celebration",
       "eliminado": "forest celebration",
       "similitud": 1.0,
-      "fecha": "2025-08-31"
+      "fecha": "2025-08-30"
     },
     {
       "conservado": "prog psy gathering",
@@ -6397,13 +6397,13 @@
       "conservado": "progressive celebration",
       "eliminado": "progressive celebration",
       "similitud": 1.0,
-      "fecha": "2026-06-20"
+      "fecha": "2026-06-21"
     },
     {
       "conservado": "progressive celebration",
       "eliminado": "progressive celebration",
       "similitud": 1.0,
-      "fecha": "2026-06-21"
+      "fecha": "2026-06-20"
     },
     {
       "conservado": "suomi celebration",
@@ -6739,13 +6739,13 @@
       "conservado": "forest party",
       "eliminado": "forest party",
       "similitud": 1.0,
-      "fecha": "2026-07-17"
+      "fecha": "2026-07-18"
     },
     {
       "conservado": "forest party",
       "eliminado": "forest party",
       "similitud": 1.0,
-      "fecha": "2026-07-18"
+      "fecha": "2026-07-17"
     },
     {
       "conservado": "Dandiya - Gold, Glamour and Goddess - Facebook",
@@ -9211,13 +9211,13 @@
       "conservado": "fullon gathering",
       "eliminado": "fullon gathering",
       "similitud": 1.0,
-      "fecha": "2025-11-22"
+      "fecha": "2025-11-23"
     },
     {
       "conservado": "fullon gathering",
       "eliminado": "fullon gathering",
       "similitud": 1.0,
-      "fecha": "2025-11-23"
+      "fecha": "2025-11-22"
     },
     {
       "conservado": "Patyriminis žygis „Kuršių nerijos knygos paraštėmis“ su Denisu ...",
@@ -9511,13 +9511,13 @@
       "conservado": "darkpsy party",
       "eliminado": "darkpsy party",
       "similitud": 1.0,
-      "fecha": "2025-10-30"
+      "fecha": "2025-10-31"
     },
     {
       "conservado": "darkpsy party",
       "eliminado": "darkpsy party",
       "similitud": 1.0,
-      "fecha": "2025-10-31"
+      "fecha": "2025-10-30"
     },
     {
       "conservado": "Tyla A*POP World Tour Johannesburg 2027 - Facebook",
@@ -10039,13 +10039,13 @@
       "conservado": "psychill festival",
       "eliminado": "psychill festival",
       "similitud": 1.0,
-      "fecha": "2026-05-02"
+      "fecha": "2026-04-30"
     },
     {
       "conservado": "psychill festival",
       "eliminado": "psychill festival",
       "similitud": 1.0,
-      "fecha": "2026-04-30"
+      "fecha": "2026-05-02"
     },
     {
       "conservado": "psychill festival",
@@ -10903,13 +10903,13 @@
       "conservado": "darkpsy party",
       "eliminado": "darkpsy party",
       "similitud": 1.0,
-      "fecha": "2025-12-11"
+      "fecha": "2025-12-12"
     },
     {
       "conservado": "darkpsy party",
       "eliminado": "darkpsy party",
       "similitud": 1.0,
-      "fecha": "2025-12-12"
+      "fecha": "2025-12-11"
     },
     {
       "conservado": "The Ritual of Karma bus Kraków - Facebook",
@@ -11381,15 +11381,15 @@
     },
     {
       "conservado": "forest psy rave",
-      "eliminado": "forest psy rave",
-      "similitud": 1.0,
-      "fecha": "2025-06-27"
-    },
-    {
-      "conservado": "forest psy rave",
       "eliminado": "forest-psy rave",
       "similitud": 1.0,
       "fecha": "2025-06-28"
+    },
+    {
+      "conservado": "forest psy rave",
+      "eliminado": "forest psy rave",
+      "similitud": 1.0,
+      "fecha": "2025-06-27"
     },
     {
       "conservado": "psycore celebration",
@@ -12596,6 +12596,12 @@
       "eliminado": "IBM Bob Coding Watch Party in Berlin & Online",
       "similitud": 0.883,
       "fecha": "2026-10-15"
+    },
+    {
+      "conservado": ", 8 октября, Морджим",
+      "eliminado": ", 8 октября, Арамболь",
+      "similitud": 1.0,
+      "fecha": "2026-10-08"
     }
   ],
   "subgeneros_rellenados": [],

@@ -493,7 +493,7 @@ def es_org_slugderivado(org):
 def _serp_eventos(motor, dork, timeout=22):
     """Consulta el motor indicado y devuelve dict {results:[{url,titulo,snippet}]}.
     - 'ddg': proceso hijo serp_worker (DuckDuckGo html).
-    - 'startpage': searxng local (docker) con engine startpage — indexa FB
+    - 'bing'/'yandex': searxng local (docker) vía Tor — indexan FB
       que DDG no toca (URLs events/<slug>/<subslug> e IDs numéricos).
     """
     if motor == 'ddg':
@@ -502,7 +502,7 @@ def _serp_eventos(motor, dork, timeout=22):
         import urllib.request as _ur
         q = urllib.parse.quote(dork)
         u = (f'http://localhost:8888/search?q={q}&format=json'
-             f'&engines=startpage')
+             f'&engines={motor}')
         req = _ur.Request(u, headers={'User-Agent': 'Mozilla/5.0'})
         d = json.loads(_ur.urlopen(req, timeout=timeout).read())
         out = []
@@ -543,7 +543,8 @@ def minar_organizadores_fb_serp(ciudades, anios=None, subgeneros=None, max_por_c
         for dork in list(dict.fromkeys(dorks)):
             consultas = [('ddg', dork)]
             if not (dork.endswith(' psy trance') or dork.endswith(' trance')):
-                consultas.append(('startpage', dork))
+                consultas.append(('bing', dork))
+                consultas.append(('yandex', dork))
             for _motor, _d in consultas:
                 try:
                     res = _serp_eventos(_motor, _d, timeout=22)
@@ -564,7 +565,7 @@ def minar_organizadores_fb_serp(ciudades, anios=None, subgeneros=None, max_por_c
                         tit = re.sub(r'\s*-\s*Facebook\s*$', '', tit, flags=re.I).strip()
                         org = _limpiar_org_fb(tit)
                         if not org or org.lower() in ('facebook',):
-                            # startpage indexa events/<org_slug>/<subslug>: el primer
+                            # bing/yandex indexan events/<org_slug>/<subslug>: el primer
                             # segmento es la página del organizador (p.ej. void-berlin).
                             _pm = re.match(r'facebook\.com/events/([^/?#]{3,})/', url.lower())
                             if _pm and not _pm.group(1).split('-')[-1].isdigit():

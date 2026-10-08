@@ -3,16 +3,15 @@
     "resident_advisor": {
       "nombre": "resident_advisor",
       "id": "resident_advisor",
-      "estado": "error",
+      "estado": "completada",
       "timeout": 90,
       "prioridad": 5,
-      "encolada": "2026-10-07T23:02:50.429333+00:00",
+      "encolada": "2026-10-08T06:01:21.972110+00:00",
       "usa_tor": true,
-      "completada": "2026-10-07T23:07:50.514348+00:00",
-      "error": "timeout",
+      "completada": "2026-10-08T06:03:43.667122+00:00",
       "resultado": {
-        "eventos": 0,
-        "tiempo": 300.08
+        "eventos": 900,
+        "tiempo": 141.69
       }
     },
     "telegram": {
@@ -21,12 +20,12 @@
       "estado": "completada",
       "timeout": 120,
       "prioridad": 5,
-      "encolada": "2026-10-07T23:02:50.429367+00:00",
+      "encolada": "2026-10-08T06:01:21.972145+00:00",
       "usa_tor": true,
-      "completada": "2026-10-07T23:07:50.514480+00:00",
+      "completada": "2026-10-08T06:03:52.802198+00:00",
       "resultado": {
-        "eventos": 16,
-        "tiempo": 300.08
+        "eventos": 14,
+        "tiempo": 150.83
       }
     },
     "reddit": {
@@ -35,12 +34,12 @@
       "estado": "completada",
       "timeout": 4,
       "prioridad": 5,
-      "encolada": "2026-10-07T23:02:50.429377+00:00",
+      "encolada": "2026-10-08T06:01:21.972155+00:00",
       "usa_tor": true,
-      "completada": "2026-10-07T23:07:50.514537+00:00",
+      "completada": "2026-10-08T06:03:52.802373+00:00",
       "resultado": {
-        "eventos": 0,
-        "tiempo": 300.08
+        "eventos": 2,
+        "tiempo": 150.83
       }
     },
     "psytrance_pl": {
@@ -49,12 +48,12 @@
       "estado": "completada",
       "timeout": 6,
       "prioridad": 5,
-      "encolada": "2026-10-07T23:02:50.429384+00:00",
+      "encolada": "2026-10-08T06:01:21.972163+00:00",
       "usa_tor": true,
-      "completada": "2026-10-07T23:07:50.514583+00:00",
+      "completada": "2026-10-08T06:03:52.802455+00:00",
       "resultado": {
-        "eventos": 0,
-        "tiempo": 300.08
+        "eventos": 6,
+        "tiempo": 150.82
       }
     },
     "isratrance": {
@@ -63,12 +62,12 @@
       "estado": "completada",
       "timeout": 4,
       "prioridad": 5,
-      "encolada": "2026-10-07T23:02:50.429390+00:00",
+      "encolada": "2026-10-08T06:01:21.972169+00:00",
       "usa_tor": true,
-      "completada": "2026-10-07T23:07:50.514628+00:00",
+      "completada": "2026-10-08T06:03:52.802503+00:00",
       "resultado": {
         "eventos": 0,
-        "tiempo": 300.08
+        "tiempo": 150.82
       }
     },
     "ektoplazm": {
@@ -77,27 +76,26 @@
       "estado": "completada",
       "timeout": 4,
       "prioridad": 5,
-      "encolada": "2026-10-07T23:02:50.429397+00:00",
+      "encolada": "2026-10-08T06:01:21.972176+00:00",
       "usa_tor": true,
-      "completada": "2026-10-07T23:07:50.514671+00:00",
+      "completada": "2026-10-08T06:03:52.802554+00:00",
       "resultado": {
-        "eventos": 0,
-        "tiempo": 300.08
+        "eventos": 3,
+        "tiempo": 150.82
       }
     },
     "meetup": {
       "nombre": "meetup",
       "id": "meetup",
-      "estado": "error",
+      "estado": "completada",
       "timeout": 4,
       "prioridad": 5,
-      "encolada": "2026-10-07T23:02:50.429403+00:00",
+      "encolada": "2026-10-08T06:01:21.972182+00:00",
       "usa_tor": true,
-      "completada": "2026-10-07T23:07:53.589005+00:00",
-      "error": "timeout",
+      "completada": "2026-10-08T06:03:52.802601+00:00",
       "resultado": {
-        "eventos": 0,
-        "tiempo": 303.16
+        "eventos": 1,
+        "tiempo": 150.82
       }
     }
   },

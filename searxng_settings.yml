@@ -7,7 +7,6 @@ search:
     - json
   request_delay:
     google: [9, 13]
-    google cse: [9, 13]
     bing: [5, 9]
     duckduckgo: [5, 9]
     brave: [7, 11]
@@ -24,31 +23,32 @@ ui:
   static_use_hash: true
 redis:
   enabled: false
+outgoing:
+  proxies:
+    all://: socks5h://host.docker.internal:9052
+  using_tor_proxy: true
 engines:
   - name: google
-    engine: google
-    shortcut: google
-  - name: google cse
-    engine: google_cse
-    disabled: true
-  - name: duckduckgo
-    engine: duckduckgo
-    shortcut: ddg
+    disabled: false
   - name: bing
-    engine: bing
-    shortcut: bing
+    disabled: false
+  - name: duckduckgo
+    disabled: false
   - name: brave
-    engine: brave
-    shortcut: brave
-  - name: google
-    engine: google
-    shortcut: google
+    disabled: false
   - name: startpage
-    engine: startpage
-    shortcut: startpage
+    disabled: false
   - name: mojeek
-    engine: mojeek
-    shortcut: mojeek
+    disabled: false
   - name: yahoo
-    engine: yahoo
-    shortcut: yahoo
+    disabled: false
+  - name: searx
+    disabled: false
+  - name: qwant
+    disabled: false
+  - name: yandex
+    disabled: false
+  - name: marginalia
+    disabled: false
+  - name: presearch
+    disabled: false
