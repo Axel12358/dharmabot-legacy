@@ -61,16 +61,22 @@ PLACEHOLDER_LOCAL = {
     'hans', 'mueller', 'muller', 'rossi', 'garcia', 'lopez',
     'prenom', 'nom', 'cognome', 'nachname', 'apellido',
     'contacto', 'kontakt', 'contatto',
+    'guest', 'notifications', 'backinstock', 'mailer', 'robot',
+    'autoreply', 'auto_reply', 'auto-reply', 'autorepl',
 }
 NO_DOMAINS = {
     'w3.org', 'cloudflare.com', 'googleapis.com', 'gstatic.com',
-    'sentry.io', 'example.com', 'test.com', 'github.io',
+    'sentry.io', 'example.com', 'example.net', 'example.info',
+    'test.com', 'github.io',
     'wix.com', 'squarespace.com', 'wordpress.com', 'delta.com',
     'booking.com', 'expedia.com', 'amazon.com', 'airbnb.com',
     # sociales/plataformas: su email no es contacto del venue/promoter
     'facebook.com', 'fb.com', 'instagram.com', 'twitter.com', 'x.com',
     'reddit.com', 'youtube.com', 't.me', 'telegram.org', 'whatsapp.com',
     'google.com', 'linkedin.com',
+    # placeholders de plantillas/notificadores observados en scrape
+    'company.com', 'venue.com', 'notifyboost.net', 'yourcompany.com',
+    'yoursite.com', 'fakeemail.com', 'email.example.com',
 }
 PLACEHOLDER_DOMAINS = {
     'email.de', 'email.com', 'mail.de', 'mail.com', 'gmail.de',
