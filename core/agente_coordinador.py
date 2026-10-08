@@ -287,19 +287,45 @@ def ejecutar_agentes(activos: Optional[List[str]] = None,
     # Sin esto se SOBRESCRIBE el enriquecimiento concurrente con el snapshot
     # stale leído al inicio del ciclo. Solo se añaden eventos nuevos.
     from core.csv_lock import csv_locked_rows
+
+    def _clave_np(r):
+        return r.get('link', '') or f"{r.get('nombre','')}|{r.get('fecha','')}"
+
+    sal_no_psy = []
     with csv_locked_rows(OUTPUT_TODOS) as (frescas, _fn):
-        vistos = {(r.get('link', '') or f"{r.get('nombre','')}|{r.get('fecha','')}") for r in frescas}
+        vistos = {_clave_np(r) for r in frescas}
         add = []
+        add_no_psy = []
         for e in nuevos:
-            k = (e.get('link', '') or f"{e.get('nombre','')}|{e.get('fecha','')}")
+            k = _clave_np(e)
             if k and k not in vistos:
                 vistos.add(k)
-                add.append(e)
+                if (e.get('subgenero') or '').strip().lower() == 'no_psy':
+                    add_no_psy.append(e)
+                else:
+                    add.append(e)
         if not dry_run:
+            sal_no_psy = [r for r in frescas
+                          if (r.get('subgenero') or '').strip().lower() == 'no_psy']
+            if sal_no_psy:
+                print(f"🔄 {len(sal_no_psy)} no-psy ya en main → movidos a non_psy.csv")
+                _ih = {id(r) for r in sal_no_psy}
+                frescas[:] = [r for r in frescas if id(r) not in _ih]
             frescas.extend(add)
             consolidados = list(frescas)
         else:
             consolidados = list(frescas) + add
+    if not dry_run and (sal_no_psy or add_no_psy):
+        try:
+            _np_file = str(Path(PROJECT_ROOT) / "non_psy.csv")
+            with csv_locked_rows(_np_file) as (_np, _fn2):
+                _vnp = {_clave_np(r) for r in _np}
+                _mover = [r for r in sal_no_psy + add_no_psy
+                          if _clave_np(r) and _clave_np(r) not in _vnp]
+                _vnp.update(_clave_np(r) for r in _mover)
+                _np.extend(_mover)
+        except Exception as e:
+            print(f"⚠️ rutear no_psy → non_psy.csv falló: {e}")
     print(f"📈 Total consolidado: {len(consolidados) - len(add)} + {len(add)} = {len(consolidados)}")
 
     if not dry_run:
