@@ -97,6 +97,43 @@ def _org_parece_basura(org):
     return False
 
 
+# Conocimiento experto verificado (fuente: verificación manual + websearch,
+# no apropiarse de emails ajenos). Clave = fragmento exacto del link.
+CONOCIDOS_LINK_ORG_EMAIL = {
+    'iono_berlin': ('IONO Music', 'info@iono-music.com'),
+    's.u.n._festival': ('S.U.N. Festival', None),
+    'amfite%c3%a1tr-na-hore': ('Žasnem z. s.', None),
+}
+# Organizador VERIFICADO con su contacto oficial (propagable por fila).
+CONOCIDO_ORG_EMAIL = {
+    'iono music': 'info@iono-music.com',
+}
+
+
+def _aplicar_conocidos():
+    """Aplica el conocimiento experto (slug->org / org->email) a filas
+    sin org o sin email. Operación cerrada y reversible (solo rellena).
+    Devuelve (orgs, emails) aplicados."""
+    orgs = emails = 0
+    with csv_locked_rows(L.CSV_FILE) as (todas, _):
+        for r in todas:
+            l = (r.get('link', '') or '').lower()
+            for frag, (org, email) in CONOCIDOS_LINK_ORG_EMAIL.items():
+                if frag in l and (r.get('organizador', '') or '').strip() in ('', 'N/A'):
+                    r['organizador'] = org
+                    orgs += 1
+                    if email and not (r.get('email', '') or '').strip():
+                        r['email'] = email
+                        emails += 1
+                    break
+            else:
+                o = (r.get('organizador', '') or '').strip().lower()
+                if o and o in CONOCIDO_ORG_EMAIL and not (r.get('email', '') or '').strip():
+                    r['email'] = CONOCIDO_ORG_EMAIL[o]
+                    emails += 1
+    return orgs, emails
+
+
 def _aplicar_email_por_org(org, email):
     """Propaga email a todas las filas de `org` que no tengan email."""
     email = (email or '').strip()
@@ -162,11 +199,12 @@ def ataque_email(cp, limite=ORGS_EMAIL_POR_PASADA):
             continue
         if time.time() - cp.get("org_email_ult", {}).get(org.lower(), 0) < 3600:
             continue
-        email = ''
-        try:
-            email = L.minar_email_organizador(org, '')
-        except Exception as e:
-            log(f"  ⚠️ email {org[:30]}: {str(e)[:60]}")
+        email = CONOCIDO_ORG_EMAIL.get(org.lower(), '')
+        if not email:
+            try:
+                email = L.minar_email_organizador(org, '')
+            except Exception as e:
+                log(f"  ⚠️ email {org[:30]}: {str(e)[:60]}")
         if email:
             aplic = _aplicar_email_por_org(org, email)
             total += aplic
@@ -187,6 +225,9 @@ def main():
     log("Atacante paralelo arrancando (orgs + emails).")
     while True:
         try:
+            g = _aplicar_conocidos()
+            if g[0] or g[1]:
+                log(f"  🧠 conocimiento experto: +{g[0]} orgs, +{g[1]} emails")
             agru = _ciudades_sin_org()
             log(f"Frentes: {sum(a['n'] for a in agru.values())} eventos FB sin org "
                 f"en {len(agru)} ciudades")
