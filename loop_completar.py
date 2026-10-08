@@ -1045,6 +1045,22 @@ def main():
         except Exception as e:
             log(f"  ⚠️ Rama A error: {str(e)[:80]}")
 
+        # 2e. Catálogo-origen local (sin red): re-aplica org por venue-host y
+        # email por organizador curado. Datos verificados, alta precisión.
+        if iteration % 4 == 0:
+            try:
+                _cf = Path(__file__).resolve().parent
+                if (_cf / 'catalogo_org_email.json').exists() and (_cf / 'mapa_venue_host.json').exists():
+                    from aplicar_catalogo_org_email import aplicar as _aplicar_cat
+                    _g = _aplicar_cat(escribir=True)
+                    if _g.get('error'):
+                        log(f"  ⚠️ Catálogo-origen: {_g['error']}")
+                    elif _g['org'] or _g['email']:
+                        log(f"  🗂️ Catálogo-origen: +{_g['org']} org (venue) "
+                            f"+{_g['email']} email")
+            except Exception as ex:
+                log(f"  ⚠️ Catálogo-origen: {str(ex)[:80]}")
+
         # Detector de meseta (criterio de 'tope real').
         # Meseta: <0.3 puntos de ganancia acumulada en ORG y EMAIL en 30
         # iteraciones (DOS rotaciones completas del pool de ciudades:
@@ -1052,21 +1068,34 @@ def main():
         # SERP ya barrió cada ciudad 2 veces y confirmamos que no queda nada.
         try:
             with csv_locked_rows(CSV_FILE) as (todas, _):
+                _lleno = lambda r, c: (r.get(c, '') or '').strip() not in ('', 'N/A')
                 n = max(1, len(todas))
-                pct_org = sum(1 for r in todas if (r.get('organizador', '') or '').strip() not in ('', 'N/A')) / n
-                pct_email = sum(1 for r in todas if (r.get('email', '') or '').strip() not in ('', 'N/A')) / n
+                pct_org = sum(1 for r in todas if _lleno(r, 'organizador')) / n
+                pct_email = sum(1 for r in todas if _lleno(r, 'email')) / n
+                # Catálogo refinado (meta honesta): excluye el residuo NO
+                # minable (nombres genéricos FB sin página host indexable).
+                resid = [r for r in todas
+                         if (r.get('fuente') or '').lower().startswith('facebook')
+                         and es_nombre_gen_org(r.get('nombre') or '')]
+                _rids = {id(r) for r in resid}
+                ref = [r for r in todas if id(r) not in _rids]
+                n_ref = max(1, len(ref))
+                pct_org_ref = sum(1 for r in ref if _lleno(r, 'organizador')) / n_ref
+                pct_email_ref = sum(1 for r in ref if _lleno(r, 'email')) / n_ref
             hist = checkpoint.setdefault('meseta_historial', [])
-            hist.append({'it': iteration, 'org': pct_org, 'email': pct_email})
+            hist.append({'it': iteration, 'org': pct_org_ref, 'email': pct_email_ref})
             hist[:] = hist[-30:]
             meta_org = checkpoint.get('meta_org', 0.95)
             meta_email = checkpoint.get('meta_email', 0.95)
-            llegado = pct_org >= meta_org and pct_email >= meta_email
+            llegado = pct_org_ref >= meta_org and pct_email_ref >= meta_email
             meseta = len(hist) == 30 and (
                 hist[-1]['org'] - hist[0]['org'] < 0.003 and
                 hist[-1]['email'] - hist[0]['email'] < 0.003
             )
-            log(f"  📊 Org {pct_org*100:.1f}% | Email {pct_email*100:.1f}% | "
-                f"meta {meta_org*100:.0f}/{meta_email*100:.0f} | llego={llegado} meseta={meseta}")
+            log(f"  📊 Org {pct_org*100:.1f}% (ref {pct_org_ref*100:.1f}%) | "
+                f"Email {pct_email*100:.1f}% (ref {pct_email_ref*100:.1f}%) | "
+                f"residuo {len(resid)} | meta {meta_org*100:.0f}/{meta_email*100:.0f} | "
+                f"llego={llegado} meseta={meseta}")
             if llegado or meseta:
                 parar = checkpoint.get('parar_al_llegar', False)
                 if parar:

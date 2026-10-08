@@ -17,6 +17,7 @@ from __future__ import annotations
 import csv
 import json
 import os
+import re
 import time
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutTimeout
 from datetime import datetime, timezone
@@ -48,6 +49,32 @@ FUNCION_SUBAGENTES: Dict[str, Callable[[], Dict]] = {
 PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
 
 OUTPUT_TODOS = str(Path(PROJECT_ROOT) / "eventos_encontrados.csv")
+
+# Filtro de ruido de INGEST (curated, conservador): eventos claramente NO-psy
+# que llegan por fuentes genéricas con subgénero heredado incorrecto (bodas,
+# bachata, boxing, worlds cups, ferias, expos...). Nunca cazan estos falsos
+# positivos conocidos (colectivos/rooms con nombre ambiguo).
+_NPSY_NAME = re.compile(
+    r"\bsalsa\s+&?\s*bachata\b|\bbachata\b|\bmambo salsa\b|\bboxing\b|"
+    r"\bworld cup\b|career fair|\bmade in ghana\b|mobility expo|"
+    r"engineering expo|\bchristmas concert\b|\bthe barra macneils\b|"
+    r"\bdebating championship|\bpole championships|"
+    r"\bstrongman .*championship|\bmagic series regional championship|"
+    r"\bpan-american championships|\baco casino\b|\bhollwood casino\b|"
+    r"\blackhawk casino\b|\bworld 50 & 55 teams championships\b|"
+    r"\beic world championships\b|\bcharity gala\b|\bfuneral\b|\bwedding\b|"
+    r"\bk-pop\b|def jam\b", re.I)
+_NPSY_FALSOS_POSITIVOS = (
+    "camion bazar", "voltage open air", "cafe mambo", "expo night",
+    "that fair and warlike form", "fairmont", "fairfield", "kahn",
+    "vaccination", "bazar de", "at mambo")
+
+
+def _es_no_psy_por_nombre(nombre):
+    n = (nombre or "").lower()
+    if any(f in n for f in _NPSY_FALSOS_POSITIVOS):
+        return False
+    return bool(n and _NPSY_NAME.search(n))
 METRICAS_FILE = str(Path(PROJECT_ROOT) / "metricas_agentes.json")
 ESTADO_FILE = str(Path(PROJECT_ROOT) / "estado_agentes.json")
 QUEUE_FILE = str(Path(PROJECT_ROOT) / "task_queue_state.json")
@@ -300,7 +327,8 @@ def ejecutar_agentes(activos: Optional[List[str]] = None,
             k = _clave_np(e)
             if k and k not in vistos:
                 vistos.add(k)
-                if (e.get('subgenero') or '').strip().lower() == 'no_psy':
+                if ((e.get('subgenero') or '').strip().lower() == 'no_psy'
+                        or _es_no_psy_por_nombre(e.get('nombre') or '')):
                     add_no_psy.append(e)
                 else:
                     add.append(e)
