@@ -56,7 +56,6 @@ SCRAPER_META = {
     # Pesados (login)
     "telegram":             {"tipo": "pesado", "costo": 4},
     "instagram_scraper":    {"tipo": "pesado", "costo": 5},
-    "fb_playwright_tor":    {"tipo": "pesado", "costo": 5},
 }
 
 SCRAPERS_LIGEROS = [k for k, v in SCRAPER_META.items() if v["costo"] <= 3]

@@ -183,36 +183,6 @@ async def main():
     else:
         print("\n🧠 Orquestador omitido (todos sus módulos desactivados en config_modulos.json)")
 
-    # ---- Completar N/A de Facebook (aditivo, no intrusivo) ----
-    # Visita las URLs de eventos FB con campos N/A (fecha/lugar/organizador)
-    # y los completa con Playwright. No pierde información: lo que no se puede
-    # obtener se deja como estaba.
-    try:
-        from pathlib import Path as _P
-        if _P(__file__).resolve().parent.joinpath(
-                "scrapers", "completar_fb_na.py").exists():
-            print("\n🔧 Completando N/A de Facebook (Playwright)...")
-            from scrapers.completar_fb_na import completar_eventos_fb
-            _res = completar_eventos_fb()
-            print(f"   ➕ {_res['actualizados']} eventos de Facebook completados")
-    except Exception as e:
-        print(f"   ⚠️ Completar FB N/A no disponible: {type(e).__name__}: {e}")
-
-    # ---- Completar N/A de Facebook con búsqueda externa (aditivo, no intrusivo) ----
-    # Para aquellos eventos FB donde Playwright no mostró lugar o fecha, buscamos
-    # en DuckDuckGo/Google una página web alternativa (foros, sitios de entradas)
-    # que contenga lugar o fecha claros.
-    try:
-        from pathlib import Path as _P
-        if _P(__file__).resolve().parent.joinpath(
-                "scrapers", "completar_fb_externo.py").exists():
-            print("\n🔎 Completando N/A de Facebook (búsqueda externa DuckDuckGo)...")
-            from scrapers.completar_fb_externo import completar_fb_externo
-            _res = completar_fb_externo()
-            print(f"   ➕ {_res['actualizados']} eventos de Facebook completados externamente")
-    except Exception as e:
-        print(f"   ⚠️ Completar FB externo no disponible: {type(e).__name__}: {e}")
-
     # ---- Enriquecer eventos Facebook vía OpenGraph (sin login, vía Tor) ----
     # Técnica validada en GitHub: las páginas de evento FB públicas renderizan
     # og:title/og:description con fecha·lugar·host incrustados. Completa los

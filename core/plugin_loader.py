@@ -83,12 +83,6 @@ MODULOS_ESPECIALES = {
         "timeout": 600,
         "tipo": "eventos",
     },
-    "fb_playwright_tor": {
-        "modulo": "scrapers.fb_playwright_tor",
-        "atributo": "scrape_fb_playwright_tor",
-        "timeout": 600,  # Pesado: Playwright + visitas a FB
-        "tipo": "eventos",
-    },
 }
 
 # Config por defecto si no existe config_modulos.json

@@ -106,6 +106,19 @@ def save_csv(data, filename="eventos_encontrados.csv"):
 
         from core.csv_lock import csv_locked_rows
 
+        # Reclasificación: eventos no-psy nunca entran a main; van a su CSV.
+        if filename == "eventos_encontrados.csv":
+            _no_psy = [e for e in data
+                       if (e.get("subgenero") or "").strip().lower() == "no_psy"]
+            if _no_psy:
+                save_csv(_no_psy, "non_psy.csv")
+                print(f"🔄 {len(_no_psy)} no-psy redirigidos a non_psy.csv")
+            data = [e for e in data
+                    if (e.get("subgenero") or "").strip().lower() != "no_psy"]
+            if not data:
+                print("✅ CSV sin filas psy nuevas; solo no_psy redirigidos (no se toca main)")
+                return
+
         with csv_locked_rows(filename, timeout=180) as (existentes, fieldnames):
             vistos = {_clave(e) for e in existentes}
             nuevos = 0
