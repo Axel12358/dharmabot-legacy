@@ -61,6 +61,7 @@ PLACEHOLDER_LOCAL = {
     'hans', 'mueller', 'muller', 'rossi', 'garcia', 'lopez',
     'prenom', 'nom', 'cognome', 'nachname', 'apellido',
     'contacto', 'kontakt', 'contatto',
+    'contato',
     'guest', 'notifications', 'backinstock', 'mailer', 'robot',
     'autoreply', 'auto_reply', 'auto-reply', 'autorepl',
 }
@@ -77,6 +78,7 @@ NO_DOMAINS = {
     # placeholders de plantillas/notificadores observados en scrape
     'company.com', 'venue.com', 'notifyboost.net', 'yourcompany.com',
     'yoursite.com', 'fakeemail.com', 'email.example.com',
+    'exemplo.com', 'domain.cz', 'exemplo.br',
 }
 PLACEHOLDER_DOMAINS = {
     'email.de', 'email.com', 'mail.de', 'mail.com', 'gmail.de',
