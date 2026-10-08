@@ -543,7 +543,6 @@ def minar_organizadores_fb_serp(ciudades, anios=None, subgeneros=None, max_por_c
         for dork in list(dict.fromkeys(dorks)):
             consultas = [('ddg', dork)]
             if not (dork.endswith(' psy trance') or dork.endswith(' trance')):
-                consultas.append(('bing', dork))
                 consultas.append(('yandex', dork))
             for _motor, _d in consultas:
                 try:
@@ -858,8 +857,12 @@ def main():
         log(f"Sin organizador: {len(sin_org)} total, {len(sin_org_fb)} minables (incl. cola FB genérica), {len(sin_org_gen)} genéricos no-FB (omitidos)")
         
         if sin_org_fb:
-            log(f"Procesando {min(BATCH, len(sin_org_fb))} eventos FB/IG enriquecibles...")
-            cambios = procesar_batch(sin_org_fb, 'org', BATCH, offset=iteration*BATCH)
+            # Rama 2a: org por nombre vía DDG → yield medido ~0 (los nombres
+            # genéricos de FB no tienen presencia en buscadores). Presupuesto
+            # pequeño: el grueso del ataque org va por el barrido SERP (2b).
+            presupuesto_2a = min(40, BATCH, len(sin_org_fb))
+            log(f"Procesando {presupuesto_2a} eventos FB/IG enriquecibles (org/2a)...")
+            cambios = procesar_batch(sin_org_fb, 'org', presupuesto_2a, offset=iteration*BATCH)
             updated = aplicar_cambios(cambios, 'org')
             log(f"  ✅ {updated} eventos actualizados con organizador")
 
