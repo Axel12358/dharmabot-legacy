@@ -7,6 +7,7 @@ y así sus peticiones a motores salen por Tor (nunca IP real).
 import asyncio
 import socket
 import struct
+import sys
 
 UPSTREAM_HOST = "127.0.0.1"
 UPSTREAM_PORT = 9050
@@ -51,7 +52,7 @@ async def handle_client(cr, cw):
         cw.write(b"\x05\x00")
         await cw.drain()
 
-        req = await cr.readexactly(4)
+        req = await cr.readexactly(3)
         if req[1] != 1:
             cw.write(b"\x05\x07\x00\x01\x00\x00\x00\x00\x00\x00")
             await cw.drain()
@@ -93,7 +94,9 @@ async def handle_client(cr, cw):
         t1 = asyncio.create_task(relay(cr, uw))
         t2 = asyncio.create_task(relay(ur, cw))
         await asyncio.gather(t1, t2, return_exceptions=True)
-    except Exception:
+    except Exception as exc:
+        import traceback
+        traceback.print_exc(file=sys.stderr)
         try:
             cw.write(b"\x05\x01\x00\x01\x00\x00\x00\x00\x00\x00")
             await cw.drain()

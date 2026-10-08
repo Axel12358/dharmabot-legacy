@@ -26,7 +26,6 @@ redis:
 outgoing:
   proxies:
     all://: socks5h://host.docker.internal:9052
-  using_tor_proxy: true
 engines:
   - name: google
     disabled: false
