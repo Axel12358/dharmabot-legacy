@@ -24,6 +24,7 @@ JUNK_RE = re.compile(
     r'|@eventbrite\.com$|@eventbrite\.es$|@lu\.ma$'
     r'|linktr\.ee|beacons\.ai|linkin\.bio|bio\.fm'
     r'|@promoter\.com$|@promoter\.net$|@promoter\.org$'
+    r'|\.(png|jpg|jpeg|gif|webp|svg|css|js|woff2?|ico|pdf)$'
     r'|^(votre|jouw|you|your)@',
     re.I,
 )
@@ -43,7 +44,9 @@ KNOWN_FALSOS = {
     'ticketing@tate.org.uk',               # museo (Tate)
     'rowan.wijnberg@marriott.com',         # cadena hotelera
     'customerservices@panchotours.com',
-        'thomas.tachelet@outlook.com',    # tours turísticos
+        'thomas.tachelet@outlook.com',
+        'psytranceplugins@outlook.com',
+        'support@mysticstore.co',    # tours turísticos
     'jurriola-schonewolf@asburyfirst.org', # iglesia
 }
 

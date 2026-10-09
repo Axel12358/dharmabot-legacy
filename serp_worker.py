@@ -24,7 +24,7 @@ def _serx(q: str, timeout: int = 20) -> dict:
 
     url = (
         "http://127.0.0.1:8888/search?"
-        + urllib.parse.urlencode({"q": q, "format": "json", "engines": "google,brave"})
+        + urllib.parse.urlencode({"q": q, "format": "json"})
     )
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "dharma/v5"})
