@@ -13,10 +13,19 @@ from core.emails_guard import es_email_basura
 CSV = '/Users/angelgarcia/dharmabot/eventos_encontrados.csv'
 
 
-def _email_ok(e):
+_FREE_MAIL = ('@gmail.com', '@hotmail.com', '@outlook.com', '@yahoo.com', '@live.com')
+
+
+def _email_ok(e, org=''):
     e = (e or '').strip()
     if not e or '@' not in e or es_email_basura(e):
         return False
+    if e.lower().endswith(_FREE_MAIL):
+        # correo personal: solo si el local-part refiere al propio organizador
+        lp = e.lower().split('@')[0]
+        org_n = (org or '').lower().replace(' ', '')
+        if not (lp in org_n or org_n in lp and len(org_n) >= 8):
+            return False
     return True
 
 
@@ -29,7 +38,7 @@ def main():
                 for r in csv.DictReader(f):
                     o = (r.get('organizador') or '').strip().lower()
                     e = (r.get('email') or '').strip()
-                    if o and _email_ok(e) and len(o) >= 3:
+                    if o and _email_ok(e, o) and len(o) >= 3:
                         pares.setdefault(o, e)
         except FileNotFoundError:
             print('sin', p)
@@ -39,7 +48,7 @@ def main():
         for k, v in cat.items():
             o = (k or '').strip().lower()
             e = (v or {}).get('email') if isinstance(v, dict) else None
-            if o and _email_ok(e):
+            if o and _email_ok(e, o):
                 pares.setdefault(o, e.strip())
     except FileNotFoundError:
         print('sin catalogo')

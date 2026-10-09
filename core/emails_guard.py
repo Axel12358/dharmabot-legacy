@@ -40,7 +40,8 @@ KNOWN_FALSOS = {
     'coaching@wayofdk.de',                 # coaching
     'ticketing@tate.org.uk',               # museo (Tate)
     'rowan.wijnberg@marriott.com',         # cadena hotelera
-    'customerservices@panchotours.com',    # tours turísticos
+    'customerservices@panchotours.com',
+        'thomas.tachelet@outlook.com',    # tours turísticos
     'jurriola-schonewolf@asburyfirst.org', # iglesia
 }
 
