@@ -45,6 +45,17 @@ def csv_locked_rows(csv_path, timeout=180, encoding="utf-8", extrasaction="ignor
                 fieldnames = reader.fieldnames
                 rows = list(reader)
             yield rows, fieldnames
+            # Guarda central anti-basura (self-healing en escritura): ningún
+            # writer puede persistir emails de plantilla/default/falsos.
+            try:
+                from core.emails_guard import es_email_basura
+            except Exception:
+                es_email_basura = None
+            if es_email_basura is not None:
+                for _r in rows:
+                    _e = (_r.get("email") or "").strip().lower()
+                    if _e and es_email_basura(_e, _r):
+                        _r["email"] = ""
             tmp_path = csv_path + ".tmp"
             with open(tmp_path, "w", encoding=encoding, newline="") as f:
                 w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction=extrasaction)
