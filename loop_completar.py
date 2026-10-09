@@ -215,6 +215,9 @@ try:
     def es_email_valido(email):
         if not email:
             return False
+        from core.emails_guard import es_email_basura
+        if es_email_basura(email):
+            return False
         if not _ve_valido(email):
             return False
         e = email.lower()
@@ -226,6 +229,9 @@ except Exception:
     def es_email_valido(email):
         """Filtra emails falsos o genéricos (fallback local)."""
         if not email:
+            return False
+        from core.emails_guard import es_email_basura
+        if es_email_basura(email):
             return False
         e = email.lower()
         if any(e.startswith(p) for p in GENERIC_EMAILS):
@@ -651,7 +657,10 @@ def buscar_email_para_evento(evento):
             except Exception:
                 pass
     
-    return _dedup_emails(emails_concurrentes)[:1][0] if emails_concurrentes else ''
+    for e in _dedup_emails(emails_concurrentes):
+        if es_email_valido(e):
+            return e
+    return ''
 
 def buscar_org_para_evento(evento):
     """Busca organizador para un evento via DDG."""
