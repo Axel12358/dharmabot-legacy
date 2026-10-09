@@ -21,7 +21,9 @@ JUNK_RE = re.compile(
     r'|eliteadultcasting\.com'
     r'|@example\.|@domain\.|@esimerkki\.|@community\.org$'
     r'|@email\.(fr|nl|fi|cz|it|de)$|@dominio\.|@correo\.'
+    r'|@eventbrite\.com$|@eventbrite\.es$|@lu\.ma$'
     r'|linktr\.ee|beacons\.ai|linkin\.bio|bio\.fm'
+    r'|@promoter\.com$|@promoter\.net$|@promoter\.org$'
     r'|^(votre|jouw|you|your)@',
     re.I,
 )
