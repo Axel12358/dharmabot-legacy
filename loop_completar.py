@@ -24,6 +24,7 @@ if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
 from serp_worker import search as ddg_search
+from core.emails_guard import es_email_basura
 
 def fetch_hard(url, timeout=12):
     """Fetch con timeout HARD via subprocess + SIGKILL (curl_cffi+Tor)."""
@@ -424,6 +425,54 @@ def _aplicar_mapa_org(mapa, solo_vacios=True):
     return ganado
 
 
+_GOABASE_EMAILS = None
+
+
+def _goabase_email_para_org(org):
+    """Email de organizador ya minado vía goabase (JSON, sin red)."""
+    global _GOABASE_EMAILS
+    if _GOABASE_EMAILS is None:
+        try:
+            with open(_PROJECT_ROOT + '/goabase_org_emails.json', encoding='utf-8') as _f:
+                _GOABASE_EMAILS = json.load(_f)
+        except Exception:
+            _GOABASE_EMAILS = {}
+    v = _GOABASE_EMAILS.get((org or '').strip().lower())
+    return (v or {}).get('email') if isinstance(v, dict) else ''
+
+
+_MAIL_RE = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
+
+
+def _emails_en_html(html):
+    out = []
+    for m in _MAIL_RE.findall(html or ''):
+        e = m.strip('.-').lower()
+        if len(e) > 60:
+            continue
+        if e.startswith(('your', 'example', 'e.g.', 'someone', 'user@', 'name@')):
+            continue
+        if re.search(r'\.(png|jpg|jpeg|gif|webp|svg|css|js|pdf)$', e):
+            continue
+        if es_email_basura(e):
+            continue
+        out.append(e)
+    return out
+
+
+def _fetch_pagina(url, timeout=12):
+    """Directo primero; si falla, Tor (fetch_hard)."""
+    import urllib.request
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        return urllib.request.urlopen(req, timeout=timeout).read().decode('utf-8', 'ignore')
+    except Exception:
+        try:
+            return fetch_hard(url, timeout=timeout) or ''
+        except Exception:
+            return ''
+
+
 def minar_email_organizador(org, lugar):
     """Rama A: DDG→web→email para un organizador/promoter. Reutiliza el
     buscador de email por query (snippets + fetch de páginas)."""
@@ -431,6 +480,10 @@ def minar_email_organizador(org, lugar):
     if not org or _es_org_placeholder(org):
         return ''
     lugar = (lugar or '').strip()
+    # Fuente (1): organizador ya minado vía goabase (web del org)
+    geo = _goabase_email_para_org(org)
+    if geo and es_email_valido(geo):
+        return geo
     queries = [
         f'"{org}" {lugar} email contact',
         f'"{org}" psytrance promoter email booking',
@@ -444,7 +497,27 @@ def minar_email_organizador(org, lugar):
                 emails.extend(f.result(timeout=35))
             except Exception:
                 pass
-    return _dedup_emails(emails)[:1][0] if emails else ''
+    if emails:
+        return _dedup_emails(emails)[:1][0]
+    # Fuente (2): web del organizador → homepage/contacto (emails directos)
+    try:
+        res = ddg_search(f'"{org}" official site OR homepage OR "official website"', timeout=20)
+        skipd = re.compile(r'(facebook|instagram|twitter|tiktok|youtube|soundcloud|spotify|'
+                           r'wikipedia|imdb|linkedin|yelp|pinterest|goabase|partyflock|'
+                           r'residentadvisor)\.', re.I)
+        for r in (res.get('results') or [])[:6]:
+            u0 = (r.get('url') or '')
+            if not u0 or skipd.search(u0):
+                continue
+            html = _fetch_pagina(u0)
+            if html:
+                got = _dedup_emails(_emails_en_html(html))
+                if got:
+                    return got[0]
+                break
+    except Exception:
+        pass
+    return ''
 
 
 _PLACEHOLDER_ORGS = {
