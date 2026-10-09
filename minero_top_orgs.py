@@ -107,6 +107,7 @@ def _relevante(org, email, url=''):
 
 
 def _email_valido(e):
+    e = urllib.parse.unquote(e or '')
     return bool(e) and e.count('@') == 1 and not es_email_basura(e) and not _PADRES.search(e)
 
 
@@ -183,6 +184,16 @@ def _garbage(org):
     if org.startswith('http') or ' - facebook' in (org or '').lower():
         return True
     if re.fullmatch(r'[\d\s\W]+', org or ''):
+        return True
+    # org terminado en país = descriptor de lugar, no promoter
+    PAISES = {'united', 'kingdom', 'netherlands', 'germany', 'spain', 'france',
+              'italy', 'portugal', 'england', 'scotland', 'ireland', 'europe',
+              'states', 'america', 'canada', 'austria', 'belgium', 'poland',
+              'czech', 'republic', 'switzerland', 'denmark', 'sweden', 'norway',
+              'hungary', 'greece', 'croatia', 'romania', 'bulgaria', 'mexico',
+              'brazil', 'argentina', 'chile', 'colombia', 'facebook'}
+    ult = re.findall(r'[a-z]+', (org or '').lower())
+    if ult and ult[-1] in PAISES:
         return True
     return False
 

@@ -25,6 +25,7 @@ JUNK_RE = re.compile(
     r'|linktr\.ee|beacons\.ai|linkin\.bio|bio\.fm'
     r'|@promoter\.com$|@promoter\.net$|@promoter\.org$'
     r'|\.(png|jpg|jpeg|gif|webp|svg|css|js|woff2?|ico|pdf)$'
+    r'|%[0-9a-fA-F]{2}'
     r'|^(votre|jouw|you|your)@',
     re.I,
 )
@@ -46,7 +47,10 @@ KNOWN_FALSOS = {
     'customerservices@panchotours.com',
         'thomas.tachelet@outlook.com',
         'psytranceplugins@outlook.com',
-        'support@mysticstore.co',    # tours turísticos
+        'support@mysticstore.co',
+        'cg.london@maec.gov.ma',
+        'info@quantic.edu',
+        'zuiderpark@parkrun.com',    # tours turísticos
     'jurriola-schonewolf@asburyfirst.org', # iglesia
 }
 
