@@ -1078,6 +1078,23 @@ def main():
             except Exception as ex:
                 log(f"  ⚠️ Agencias: {str(ex)[:80]}")
 
+        # 2g. Auto-sanado de emails basura (local): cualquier default/plantilla
+        # re-inyectado por otros writers se vuelve a vaciar. Idempotente.
+        if iteration % 4 == 0:
+            try:
+                import subprocess as _sp2
+                _r2 = _sp2.run([sys.executable,
+                                str(Path(__file__).resolve().parent / 'depurar_emails_masivos.py'),
+                                '--apply', '--sin-backup'],
+                               capture_output=True, text=True, timeout=240)
+                _out2 = (_r2.stdout or '').strip().splitlines()
+                _apl = [l for l in _out2 if l.startswith('APLICADO')]
+                _tot = [l for l in _out2 if l.startswith('a cuarentena')]
+                if _apl and not _apl[0].startswith('APLICADO: 0'):
+                    log(f"  🧹 Auto-sanado emails — {_tot[-1] if _tot else ''} {_apl[-1]}")
+            except Exception as ex:
+                log(f"  ⚠️ Auto-sanado emails: {str(ex)[:80]}")
+
         # Detector de meseta (criterio de 'tope real').
         # Meseta: <0.3 puntos de ganancia acumulada en ORG y EMAIL en 30
         # iteraciones (DOS rotaciones completas del pool de ciudades:

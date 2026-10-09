@@ -92,8 +92,13 @@ def escribir_fusionando(csv_path, filas_calculadas, timeout=180):
             if src is None:
                 continue
             for kk, vv in src.items():
-                if _na_valor(fr.get(kk)) and str(vv or "").strip():
-                    fr[kk] = vv
+                if not (_na_valor(fr.get(kk)) and str(vv or "").strip()):
+                    continue
+                if kk == "email":
+                    from core.emails_guard import es_email_basura
+                    if es_email_basura(vv, src):
+                        continue
+                fr[kk] = vv
         agregadas = 0
         for r in filas_calculadas:
             if _clave_fila(r) not in exist:

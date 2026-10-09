@@ -6,25 +6,14 @@ Uso:  python sanear_catalogo.py [--apply]
 """
 import argparse
 import json
-import re
 import shutil
+import sys
 from pathlib import Path
 
-CAT = Path('/Users/angelgarcia/dharmabot/catalogo_org_email.json')
+sys.path.insert(0, '/Users/angelgarcia/dharmabot')
+from core.emails_guard import es_email_basura  # noqa: E402
 
-JUNK_RE = re.compile(
-    r'^u003[ce]'
-    r'|^scams@|^reportphishing@|^abuse@'
-    r'|legal@partyx\.info'
-    r'|khalti\.com'
-    r'|newcastleherald\.com\.au'
-    r'|support\.yandex'
-    r'|@email\.(fr|nl)$|@community\.org$'
-    r'|@example\.(com|org)$|@dominio\.|@correo\.'
-    r'|^(votre|jouw|you|your)@',
-    re.I,
-)
-DEFAULT_MASIVO = 'alteredstatepsy@gmail.com'
+CAT = Path('/Users/angelgarcia/dharmabot/catalogo_org_email.json')
 
 
 def main():
@@ -40,7 +29,7 @@ def main():
         e = (v.get('email') or '').strip()
         if not e:
             continue
-        if JUNK_RE.search(e.lower()) or e.lower() == DEFAULT_MASIVO:
+        if es_email_basura(e):
             tocados.append((k, e))
             v['email'] = ''
 
