@@ -1061,6 +1061,23 @@ def main():
             except Exception as ex:
                 log(f"  ⚠️ Catálogo-origen: {str(ex)[:80]}")
 
+        # 2f. Contactos de agencia/booking (local, sin red): refresca
+        # agencias_bookings*.csv barriendo todo lo compilado. Alimenta el
+        # workstream comercial (agencias de booking de la escena).
+        if iteration % 8 == 0:
+            try:
+                import subprocess as _sp
+                _r = _sp.run([sys.executable,
+                              str(Path(__file__).resolve().parent / 'buscar_agencias.py')],
+                             capture_output=True, text=True, timeout=240)
+                _out = (_r.stdout or '').strip().splitlines()
+                if _r.returncode == 0 and _out:
+                    log(f"  🏢 Agencias/bookings: {_out[-1]}")
+                else:
+                    log(f"  ⚠️ Agencias: rc={_r.returncode} {(_r.stderr or '')[:60]}")
+            except Exception as ex:
+                log(f"  ⚠️ Agencias: {str(ex)[:80]}")
+
         # Detector de meseta (criterio de 'tope real').
         # Meseta: <0.3 puntos de ganancia acumulada en ORG y EMAIL en 30
         # iteraciones (DOS rotaciones completas del pool de ciudades:
@@ -1088,7 +1105,11 @@ def main():
             meta_org = checkpoint.get('meta_org', 0.95)
             meta_email = checkpoint.get('meta_email', 0.95)
             llegado = pct_org_ref >= meta_org and pct_email_ref >= meta_email
-            meseta = len(hist) == 30 and (
+            # Meseta = "tope real" solo si ya estamos cerca del techo. Si la
+            # cobertura está baja (p.ej. tras una limpieza de datos), NO es
+            # meseta: queda trabajo minable y el loop debe seguir.
+            _piso = checkpoint.get('meseta_piso', 0.80)
+            meseta = len(hist) == 30 and pct_org_ref >= _piso and pct_email_ref >= _piso and (
                 hist[-1]['org'] - hist[0]['org'] < 0.003 and
                 hist[-1]['email'] - hist[0]['email'] < 0.003
             )
