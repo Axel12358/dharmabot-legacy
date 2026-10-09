@@ -1,0 +1,15 @@
+[submodule "fb-restriction-toolkit"]
+	path = fb-restriction-toolkit
+	url = https://github.com/Axel12358/fb-restriction-toolkit.git
+[submodule "proxies_local"]
+	path = proxies_local
+	url = https://github.com/komutan234/Proxy-List-Free.git
+[submodule "fb_scraper_adityamukhopadhyay"]
+	path = scrapers/fb_scraper_adityamukhopadhyay
+	url = https://github.com/adityamukhopadhyay/fb-event-scraper.git
+[submodule "fb_scraper_baberibrar"]
+	path = scrapers/fb_scraper_baberibrar
+	url = https://github.com/baberibrar/facebook-events-scraper.git
+[submodule "fb_scraper_mrkkr"]
+	path = scrapers/fb_scraper_mrkkr
+	url = https://github.com/mrkkr/fb-events-scraper.git
