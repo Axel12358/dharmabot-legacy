@@ -55,7 +55,7 @@ GARB = {'explore', 'comida', 'compras', 'airports', 'location', 'today', 'events
         'free', 'festival', 'techno', 'trance', 'rave', 'party', 'parties', 'musica',
         'hangout', 'meetup', 'other', 'misc', 'miscelaneos', 'eventstoday', 'khalti',
         'promotion', 'promo', 'event', 'agenda', 'colecionar', 'arquivo', 'prueba',
-        'test', 'psytrance', 'outlook', 'konferencia', 'congreso', 'kongress', 'kongresse', 'congress', 'heute',
+        'test', 'psytrance', 'outlook', 'facebookdorks', 'facebook', 'konferencia', 'congreso', 'kongress', 'kongresse', 'congress', 'heute',
         'entradasgratuitas', 'gratuito', 'bono', 'voucher', 'descuentos', 'ofertas'}
 
 
