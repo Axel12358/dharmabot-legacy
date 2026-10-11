@@ -1,4 +1,4 @@
-.PHONY: install run loop test clean
+.PHONY: install run loop test salud clean
 
 install:
 	pip install -r requirements.txt
@@ -11,7 +11,11 @@ loop:
 	./run_loop_completar.sh
 
 test:
-	python -m pytest tests/ || echo "No tests defined"
+	@python3 -m pytest tests/ 2>/dev/null || python3 tests/test_minero_breaker.py
+
+# Healthcheck runtime: prueba constante del pipeline (CSV, loop, SERP, watchdog).
+salud:
+	python3 salud.py
 
 clean:
 	find . -type f -name "*.pyc" -delete

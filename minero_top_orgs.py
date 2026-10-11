@@ -144,16 +144,45 @@ def _sitio_del_org(org, toks, url, html):
     return any(t in blob for t in toks if len(t) >= 4)
 
 
+class SerpBreaker:
+    """Circuit-breaker: aborta el lote si el SERP lleva 15 llamadas sin status 200.
+    Evita masticar ceros cuando se muere el pipeline (DDG + SearXNG caídos)."""
+    LIMITE = 15
+
+    def __init__(self):
+        self.fallos = 0
+        self.abortado = False
+        self.motivo = ''
+
+    def registrar(self, status, error=''):
+        if status == 200:
+            self.fallos = 0
+            return
+        self.fallos += 1
+        if self.fallos >= self.LIMITE and not self.abortado:
+            self.abortado = True
+            self.motivo = f'SERP caído tras {self.fallos} llamadas sin status 200 ({error})'
+
+
+minar_breaker = SerpBreaker()
+
+
 def minar_org(org, extra_queries=''):
+    if minar_breaker.abortado:
+        return ''
     toks = _tokens_org(org)
     if not toks:
         return ''
     queries = [f'"{org}" official website contact email',
                f'"{org}" booking contact email {extra_queries}'.strip()]
     for q in queries:
+        if minar_breaker.abortado:
+            break
         try:
             res = ddg_search(q, timeout=22)
-        except Exception:
+            minar_breaker.registrar(res.get('status'), res.get('error'))
+        except Exception as e:
+            minar_breaker.registrar(0, str(e)[:100])
             continue
         for r in (res.get('results') or [])[:5]:
             u0 = (r.get('url') or '')
@@ -277,6 +306,8 @@ def main():
 
     def tarea(org, nfilas):
         nonlocal n_ok, n_vac
+        if minar_breaker.abortado:
+            return
         try:
             e = minar_org(org)
         except Exception:
@@ -298,6 +329,10 @@ def main():
         for f in futs:
             f.result()
     OUT.write_text(json.dumps(prev, ensure_ascii=False, indent=1), encoding='utf-8')
+    if minar_breaker.abortado:
+        print(f'ABORTADO: {minar_breaker.motivo} | con email {n_ok} | vacíos {n_vac} | '
+              f'{time.time()-t0:.0f}s', flush=True)
+        return 1
     print(f'FIN: con email {n_ok} | vacíos {n_vac} | {time.time()-t0:.0f}s')
 
 

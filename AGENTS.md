@@ -101,6 +101,25 @@ Auto-descubrimiento en `scrapers/*.py` con `config_modulos.json`:
 - `0491134` fix: algebra_lineal escribe CSV bajo csv_lock
 - `0933038` chore: limpieza qwen/ollama + rename llm_hibrido→hibrido + CSV locking
 
+## SKILLS ACTIVADOS (gatillos obligatorios)
+
+Los skills pueden cargarse en el proyecto `.agents/skills/`. **No son de adorno:
+se GATILLAN solos según el evento**, y la comprobación forma parte del trabajo:
+
+| Skill                    | Se activa cuando…                                          | Qué obliga a hacer                                      |
+|--------------------------|------------------------------------------------------------|---------------------------------------------------------|
+| `systematic-debugging`   | cualquier bug/test rojo/comportamiento inesperado          | causa raíz antes de cualquier fix; evidencia en las fronteras; defense-in-depth; nunca parche-síntoma |
+| `web-design-guidelines`  | revisar/auditar cualquier UI (horarios, páginas de evento) | checklist de accesibilidad/UX antes de publicar         |
+| `frontend-design`        | crear o rediseñar cualquier UI nueva                       | dirección estética explícita, no defaults               |
+| `grilling` / `grill-me`  | el usuario pide "grill"/estrés de un plan/estrategia       | entrevista a fondo antes de codificar                   |
+| `customize-opencode`     | editar config de opencode (opencode.json, .opencode/, skills) | validar contras de la config, no adivinar              |
+
+Regla operativa: **todo fix factual = pasar por systematic-debugging**. Un cambio
+que se sube sin haber identificado la causa raíz está mal hecho (quedará como
+deuda). La suite de pruebas + `make salud` (healthcheck runtime) son la
+"comprobación constante" que exige el protocolo: correrlas periódicamente detecta
+regresiones ANTES de que lleguen a producción.
+
 ## PENDIENTES
 
 1. Recargar el MCP `dharmadhatu-clasificador` en OpenCode (renombramos el módulo qwen).
