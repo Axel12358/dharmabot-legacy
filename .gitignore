@@ -119,3 +119,4 @@ scrapers/instagram_dorks/*.json
 
 # evidencia de incidentes del watchdog (runtime, no código)
 incidents/
+propuestas_org.jsonl
