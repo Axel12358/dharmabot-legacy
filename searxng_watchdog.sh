@@ -14,7 +14,8 @@ if /usr/local/bin/docker inspect -f '{{.State.Status}}' searxng 2>/dev/null |
         'http://127.0.0.1:8888/search?q=test&format=json' | grep -q '200'; then
         exit 0
     fi
-    # container "running" pero web caída: evidenciarlo igual
+    # container "running" pero web caída: evidenciar Y forzar ciclo
+    # (timeouts masivos = estado colgado; un restart limpia el SOCKS de Tor)
     INC="${LOG_DIR}/searxng_${STAMP}.txt"
     {
         echo "== web muerta con contenedor 'running' $STAMP =="
@@ -22,7 +23,11 @@ if /usr/local/bin/docker inspect -f '{{.State.Status}}' searxng 2>/dev/null |
             'estado={{.State.Status}} iniciado={{.State.StartedAt}} finalizado={{.State.FinishedAt}} restarts={{.RestartCount}} policy={{.HostConfig.RestartPolicy.Name}}'
         echo '== logs últimos 80 =='
         /usr/local/bin/docker logs searxng --tail 80 2>&1
+        echo '== motores Tor vivos? =='
+        timeout 5 bash -c 'echo > /dev/tcp/127.0.0.1/9052 && echo tor-9052 OK || echo tor-9052 MUERTO' 2>/dev/null || echo 'tor-9052 MUERTO'
     } >>"$INC" 2>&1
+    /usr/local/bin/docker restart searxng >>"$INC" 2>&1
+    echo "SearXNG reiniciado (running ciego) — incidente: $INC"
     exit 0
 fi
 
